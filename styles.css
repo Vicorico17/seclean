@@ -58,21 +58,7 @@ h2 {
 }
 
 .shell {
-  display: grid;
-  grid-template-columns: 246px minmax(0, 1fr);
   min-height: 100vh;
-}
-
-.sidebar {
-  position: sticky;
-  top: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 22px;
-  height: 100vh;
-  padding: 20px 16px;
-  border-right: 1px solid var(--line);
-  background: var(--paper);
 }
 
 .brand {
@@ -104,22 +90,20 @@ h2 {
 }
 
 .nav-list {
-  display: grid;
+  display: flex;
   gap: 6px;
 }
 
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  min-height: 44px;
-  width: 100%;
-  padding: 0 12px;
-  border: 1px solid transparent;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: transparent;
+  background: var(--paper);
   color: var(--muted);
-  text-align: left;
   font-weight: 800;
 }
 
@@ -130,29 +114,8 @@ h2 {
   color: var(--teal-dark);
 }
 
-.nav-symbol {
-  width: 10px;
-  height: 10px;
-  border: 2px solid currentColor;
-  border-radius: 2px;
-}
-
-.sidebar-card {
-  margin-top: auto;
-  display: grid;
-  gap: 6px;
-  padding: 14px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--panel);
-}
-
-.sidebar-card strong {
-  font-size: 18px;
-}
-
-.sidebar-card small {
-  color: var(--muted);
+.top-nav[hidden] {
+  display: none;
 }
 
 .workspace {
@@ -174,6 +137,13 @@ h2 {
   backdrop-filter: blur(12px);
 }
 
+.topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
 .topbar-actions {
   display: flex;
   gap: 8px;
@@ -188,6 +158,8 @@ h2 {
 }
 
 .view {
+  max-width: 1280px;
+  margin: 0 auto;
   padding: 24px 28px 36px;
 }
 
@@ -272,63 +244,15 @@ h2 {
 }
 
 .onboarding-shell {
-  display: grid;
-  grid-template-columns: 280px minmax(320px, 620px);
-  gap: 18px;
-  align-items: start;
-  max-width: 960px;
-  padding: 24px;
-}
-
-.onboarding-steps {
-  display: grid;
-  gap: 18px;
-}
-
-.step-list {
-  display: grid;
-  gap: 8px;
-}
-
-.step-item {
-  display: grid;
-  grid-template-columns: 30px minmax(0, 1fr);
-  gap: 10px;
-  align-items: center;
-  min-height: 42px;
-  padding: 8px;
-  border: 1px solid transparent;
-  border-radius: var(--radius);
-  color: var(--muted);
-}
-
-.step-item span {
-  display: grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 999px;
-  background: #edf0ed;
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 900;
-}
-
-.step-item.is-active {
-  border-color: #cdd8d2;
-  background: #f0f7f4;
-  color: var(--teal-dark);
-}
-
-.step-item.is-active span,
-.step-item.is-done span {
-  background: var(--teal);
-  color: white;
+  max-width: 660px;
+  margin: 20px auto 0;
+  padding: 0;
 }
 
 .onboarding-card {
-  padding: 18px;
-  box-shadow: none;
+  display: grid;
+  gap: 18px;
+  padding: 22px;
 }
 
 .onboarding-form {
@@ -357,6 +281,32 @@ h2 {
 .onboarding-checklist {
   display: grid;
   gap: 8px;
+}
+
+.onboarding-progress {
+  display: grid;
+  gap: 10px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.onboarding-progress strong {
+  display: block;
+  margin-top: 3px;
+  font-size: 18px;
+}
+
+.progress-track {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e8ece7;
+}
+
+.progress-fill {
+  width: var(--value);
+  height: 100%;
+  background: var(--teal);
 }
 
 .two-field-grid {
@@ -628,8 +578,7 @@ h2 {
 
 @media (max-width: 1150px) {
   .dashboard-grid,
-  .cleaner-layout,
-  .onboarding-shell {
+  .cleaner-layout {
     grid-template-columns: 1fr;
   }
 
@@ -651,33 +600,19 @@ h2 {
 }
 
 @media (max-width: 860px) {
-  .shell {
-    grid-template-columns: 1fr;
-  }
-
-  .sidebar {
-    position: static;
-    height: auto;
-    padding: 12px;
-  }
-
   .nav-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
   }
 
   .nav-item {
+    flex: 1;
     justify-content: center;
     text-align: center;
   }
 
-  .nav-symbol,
-  .sidebar-card {
-    display: none;
-  }
-
   .topbar {
     position: static;
-    align-items: flex-start;
+    align-items: stretch;
     flex-direction: column;
     padding: 18px;
   }

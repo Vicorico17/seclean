@@ -37,8 +37,6 @@ const onboardingSteps = [
   "Property",
   "Bookings",
   "Checklist",
-  "Team",
-  "First Turnover",
 ];
 
 const viewTitles = {
@@ -123,8 +121,9 @@ function saveState() {
 function render() {
   const inOnboarding = !state.onboarding.completed;
   viewTitle.textContent = inOnboarding ? "Property Manager Onboarding" : viewTitles[state.activeView];
+  const mainNav = document.querySelector("#mainNav");
+  if (mainNav) mainNav.hidden = inOnboarding;
   updateNav();
-  updateSidebarCard();
 
   if (inOnboarding) {
     appView.innerHTML = renderOnboarding();
@@ -140,45 +139,24 @@ function updateNav() {
   });
 }
 
-function updateSidebarCard() {
-  const nextJob = state.cleaningJobs
-    .filter((job) => job.status !== "ready")
-    .sort((a, b) => a.due.localeCompare(b.due))[0];
-  const property = nextJob ? getProperty(nextJob.propertyId) : null;
-  document.querySelector("#nextCheckin").textContent = property ? property.name : "--";
-  document.querySelector("#nextCheckinMeta").textContent = nextJob
-    ? `${nextJob.due} / ${getTeamMember(nextJob.cleanerId)?.name || "Unassigned"}`
-    : state.onboarding.completed
-      ? "All properties ready"
-      : "Finish onboarding";
-}
-
 function renderOnboarding() {
   const step = state.onboarding.step;
+  const progress = Math.round(((step + 1) / onboardingSteps.length) * 100);
   return `
     <section class="onboarding-shell">
-      <aside class="onboarding-steps">
-        <span class="eyebrow">Setup</span>
-        <h2>Get your first turnover ready</h2>
-        <div class="step-list">
-          ${onboardingSteps.map((label, index) => renderStepIndicator(label, index)).join("")}
-        </div>
-      </aside>
       <div class="onboarding-card">
+        <div class="onboarding-progress">
+          <div>
+            <span class="eyebrow">Step ${step + 1} of ${onboardingSteps.length}</span>
+            <strong>${onboardingSteps[step]}</strong>
+          </div>
+          <div class="progress-track" aria-label="${progress}% complete">
+            <div class="progress-fill" style="--value: ${progress}%"></div>
+          </div>
+        </div>
         ${renderOnboardingStep(step)}
       </div>
     </section>
-  `;
-}
-
-function renderStepIndicator(label, index) {
-  const done = index < state.onboarding.step;
-  const active = index === state.onboarding.step;
-  return `
-    <div class="step-item ${active ? "is-active" : ""} ${done ? "is-done" : ""}">
-      <span>${done ? "OK" : index + 1}</span>
-      <strong>${label}</strong>
-    </div>
   `;
 }
 
@@ -186,9 +164,7 @@ function renderOnboardingStep(step) {
   if (step === 0) return renderAccountStep();
   if (step === 1) return renderPropertyStep();
   if (step === 2) return renderBookingSourceStep();
-  if (step === 3) return renderChecklistStep();
-  if (step === 4) return renderTeamStep();
-  return renderTurnoverStep();
+  return renderChecklistStep();
 }
 
 function renderAccountStep() {
@@ -241,8 +217,8 @@ function renderBookingSourceStep() {
   return `
     <form class="onboarding-form" data-onboarding-form="booking-source">
       <span class="eyebrow">Step 3</span>
-      <h2>Connect bookings</h2>
-      <p>Managers can start with Guesty, an iCal feed, or manual booking entry. This demo records the chosen source.</p>
+      <h2>Add bookings</h2>
+      <p>Add the booking source and the first reservation so the manager dashboard has a calendar immediately.</p>
       <label>
         <span>Booking source</span>
         <select class="select" name="type">
@@ -256,79 +232,9 @@ function renderBookingSourceStep() {
         <span>Calendar link or account note</span>
         <input class="field" name="source" placeholder="https://.../calendar.ics or Guesty account name" />
       </label>
-      <button class="button primary" type="submit">Save booking source</button>
-    </form>
-  `;
-}
-
-function renderChecklistStep() {
-  return `
-    <form class="onboarding-form" data-onboarding-form="checklist">
-      <span class="eyebrow">Step 4</span>
-      <h2>Set the cleaner checklist</h2>
-      <p>Choose the required items a cleaner must confirm before marking an apartment turn-ready.</p>
-      <div class="onboarding-checklist">
-        ${inventoryItems.map((item) => `
-          <label class="check-item is-flat">
-            <input type="checkbox" name="checklist" value="${item.id}" ${state.onboarding.checklist.includes(item.id) ? "checked" : ""} />
-            <span>${item.label}</span>
-          </label>
-        `).join("")}
-      </div>
-      <button class="button primary" type="submit">Save checklist</button>
-    </form>
-  `;
-}
-
-function renderTeamStep() {
-  const firstProperty = state.properties[0];
-  return `
-    <form class="onboarding-form" data-onboarding-form="team">
-      <span class="eyebrow">Step 5</span>
-      <h2>Invite the first cleaner</h2>
-      <p>Cleaners only see the properties they are assigned to.</p>
-      <label>
-        <span>Cleaner name</span>
-        <input class="field" name="name" placeholder="Maya Chen" required />
-      </label>
-      <label>
-        <span>Cleaner email</span>
-        <input class="field" name="email" type="email" placeholder="maya@example.com" required />
-      </label>
-      <label>
-        <span>Property access</span>
-        <select class="select" name="propertyId">
-          ${state.properties.map((property) => `<option value="${property.id}" ${property.id === firstProperty?.id ? "selected" : ""}>${property.name}</option>`).join("")}
-        </select>
-      </label>
-      <button class="button primary" type="submit">Add cleaner</button>
-    </form>
-  `;
-}
-
-function renderTurnoverStep() {
-  const firstProperty = state.properties[0];
-  const firstCleaner = state.team[0];
-  return `
-    <form class="onboarding-form" data-onboarding-form="turnover">
-      <span class="eyebrow">Step 6</span>
-      <h2>Confirm the first turnover</h2>
-      <p>This creates the first booking, first cleaning task, and ready/not-ready status on the manager dashboard.</p>
-      <label>
-        <span>Property</span>
-        <select class="select" name="propertyId">
-          ${state.properties.map((property) => `<option value="${property.id}" ${property.id === firstProperty?.id ? "selected" : ""}>${property.name}</option>`).join("")}
-        </select>
-      </label>
-      <label>
-        <span>Cleaner</span>
-        <select class="select" name="cleanerId">
-          ${state.team.map((member) => `<option value="${member.id}" ${member.id === firstCleaner?.id ? "selected" : ""}>${member.name}</option>`).join("")}
-        </select>
-      </label>
       <div class="two-field-grid">
         <label>
-          <span>Guest name</span>
+          <span>First guest name</span>
           <input class="field" name="guest" placeholder="Eli Park" required />
         </label>
         <label>
@@ -350,6 +256,25 @@ function renderTurnoverStep() {
           <span>Check-in time</span>
           <input class="field" name="checkin" value="15:00" required />
         </label>
+      </div>
+      <button class="button primary" type="submit">Save booking source</button>
+    </form>
+  `;
+}
+
+function renderChecklistStep() {
+  return `
+    <form class="onboarding-form" data-onboarding-form="checklist">
+      <span class="eyebrow">Step 4</span>
+      <h2>Set the cleaner checklist</h2>
+      <p>Choose the required items a future cleaner must confirm before marking an apartment turn-ready.</p>
+      <div class="onboarding-checklist">
+        ${inventoryItems.map((item) => `
+          <label class="check-item is-flat">
+            <input type="checkbox" name="checklist" value="${item.id}" ${state.onboarding.checklist.includes(item.id) ? "checked" : ""} />
+            <span>${item.label}</span>
+          </label>
+        `).join("")}
       </div>
       <button class="button primary" type="submit">Finish setup</button>
     </form>
@@ -483,6 +408,19 @@ function renderTeamMember(member) {
 function renderCleanerDashboard() {
   const cleaners = state.team.filter((member) => member.role === "Cleaner");
   const activeCleaner = getTeamMember(state.activeCleanerId) || cleaners[0];
+  if (!cleaners.length) {
+    return `
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <span class="eyebrow">Cleaner Dashboard</span>
+            <h2>No cleaners added yet</h2>
+          </div>
+        </div>
+        <div class="empty-state">The property manager can add cleaners and property access from the manager dashboard.</div>
+      </section>
+    `;
+  }
   const jobs = state.cleaningJobs.filter(
     (job) => job.cleanerId === activeCleaner?.id && job.status !== "ready"
   );
@@ -701,38 +639,13 @@ function handleOnboardingSubmit(form) {
   }
 
   if (stepName === "booking-source") {
+    const propertyId = state.properties[0]?.id || "";
+    const start = String(data.get("start")).trim();
+    const checkin = String(data.get("checkin")).trim();
     state.onboarding.bookingSource = {
       type: String(data.get("type")),
       source: String(data.get("source") || "").trim(),
     };
-    state.onboarding.step = 3;
-  }
-
-  if (stepName === "checklist") {
-    const checklist = data.getAll("checklist").map(String);
-    state.onboarding.checklist = checklist.length ? checklist : defaultChecklist;
-    state.onboarding.step = 4;
-  }
-
-  if (stepName === "team") {
-    const propertyId = String(data.get("propertyId"));
-    const member = {
-      id: `team-${Date.now()}`,
-      name: String(data.get("name")).trim(),
-      email: String(data.get("email")).trim(),
-      role: "Cleaner",
-      propertyIds: [propertyId],
-    };
-    state.team = [member];
-    state.activeCleanerId = member.id;
-    state.onboarding.step = 5;
-  }
-
-  if (stepName === "turnover") {
-    const propertyId = String(data.get("propertyId"));
-    const cleanerId = String(data.get("cleanerId"));
-    const start = String(data.get("start")).trim();
-    const checkin = String(data.get("checkin")).trim();
     state.bookings = [
       {
         id: `booking-${Date.now()}`,
@@ -745,13 +658,21 @@ function handleOnboardingSubmit(form) {
         checkout: "10:00",
       },
     ];
+    state.onboarding.step = 3;
+  }
+
+  if (stepName === "checklist") {
+    const checklist = data.getAll("checklist").map(String);
+    state.onboarding.checklist = checklist.length ? checklist : defaultChecklist;
+    const booking = state.bookings[0];
+    const propertyId = booking?.propertyId || state.properties[0]?.id || "";
     state.cleaningJobs = [
       {
         id: `job-${Date.now()}`,
         propertyId,
-        cleanerId,
+        cleanerId: "",
         status: "not-ready",
-        due: `${start}, ${checkin}`,
+        due: `${booking?.start || "Jun 18"}, ${booking?.checkin || "15:00"}`,
         cleaned: false,
         checklist: state.onboarding.checklist,
         completedItems: [],

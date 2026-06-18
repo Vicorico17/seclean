@@ -5,7 +5,7 @@ A static MVP for property managers and cleaning teams who need a simple way to t
 ## What it covers
 
 - Property manager account setup as the first step
-- Six-step property manager onboarding: account, first property, booking source, checklist, team invite, first turnover
+- Clean four-step property manager onboarding that asks for one setup area at a time: account, first property, bookings, checklist
 - Manager dashboard with all properties, booking calendar, and ready/not-ready status
 - Team access so managers can add cleaners and assign property access
 - Cleaner dashboard with only the properties assigned to that cleaner
