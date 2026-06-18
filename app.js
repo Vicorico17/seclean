@@ -1,40 +1,10 @@
 const checklistTemplate = [
-  {
-    id: "beds",
-    label: "Beds changed",
-    note: "Fresh sheets, pillowcases, duvet covers",
-    group: "Linen",
-  },
-  {
-    id: "bathrooms",
-    label: "Bathrooms reset",
-    note: "Towels, amenities, trash, surfaces",
-    group: "Cleaning",
-  },
-  {
-    id: "kitchen",
-    label: "Kitchen checked",
-    note: "Dishes, coffee, dishwasher, counters",
-    group: "Cleaning",
-  },
-  {
-    id: "floors",
-    label: "Floors and high-touch surfaces",
-    note: "Vacuum, mop, remotes, switches",
-    group: "Cleaning",
-  },
-  {
-    id: "restock",
-    label: "Consumables restocked",
-    note: "Paper goods, coffee, soap, trash bags",
-    group: "Inventory",
-  },
-  {
-    id: "photos",
-    label: "Completion photos",
-    note: "Bedroom, bathroom, kitchen, entry",
-    group: "Proof",
-  },
+  { id: "beds", label: "Beds changed", note: "Fresh sheets, pillowcases, duvet covers", group: "Linen" },
+  { id: "bathrooms", label: "Bathrooms reset", note: "Towels, amenities, trash, surfaces", group: "Cleaning" },
+  { id: "kitchen", label: "Kitchen checked", note: "Dishes, coffee, dishwasher, counters", group: "Cleaning" },
+  { id: "floors", label: "Floors and surfaces", note: "Vacuum, mop, remotes, switches", group: "Cleaning" },
+  { id: "restock", label: "Consumables restocked", note: "Paper goods, coffee, soap, trash bags", group: "Inventory" },
+  { id: "photos", label: "Completion photos", note: "Bedroom, bathroom, kitchen, entry", group: "Proof" },
 ];
 
 const cleaners = [
@@ -45,8 +15,11 @@ const cleaners = [
 ];
 
 const defaultState = {
-  activeView: "dashboard",
+  activeView: "manager",
   selectedJobId: "mercer-4b",
+  cleanerSelectedJobId: "mercer-4b",
+  activeCleanerId: "maya",
+  managerFilter: "attention",
   filters: {
     search: "",
     cleaner: "all",
@@ -88,60 +61,14 @@ const defaultState = {
     },
   ],
   inventory: [
-    {
-      id: "king-sheets",
-      item: "King sheet sets",
-      category: "Linen",
-      onHand: 14,
-      par: 24,
-      reserved: 8,
-      unit: "sets",
-    },
-    {
-      id: "queen-sheets",
-      item: "Queen sheet sets",
-      category: "Linen",
-      onHand: 28,
-      par: 30,
-      reserved: 12,
-      unit: "sets",
-    },
-    {
-      id: "bath-towels",
-      item: "Bath towels",
-      category: "Linen",
-      onHand: 86,
-      par: 120,
-      reserved: 36,
-      unit: "ea",
-    },
-    {
-      id: "coffee-pods",
-      item: "Coffee pods",
-      category: "Amenity",
-      onHand: 220,
-      par: 300,
-      reserved: 96,
-      unit: "ea",
-    },
-    {
-      id: "bath-tissue",
-      item: "Bath tissue",
-      category: "Consumable",
-      onHand: 44,
-      par: 96,
-      reserved: 28,
-      unit: "rolls",
-    },
-    {
-      id: "dish-tabs",
-      item: "Dishwasher tabs",
-      category: "Consumable",
-      onHand: 62,
-      par: 80,
-      reserved: 18,
-      unit: "ea",
-    },
+    { id: "king-sheets", item: "King sheet sets", category: "Linen", onHand: 14, par: 24, reserved: 8, unit: "sets" },
+    { id: "queen-sheets", item: "Queen sheet sets", category: "Linen", onHand: 28, par: 30, reserved: 12, unit: "sets" },
+    { id: "bath-towels", item: "Bath towels", category: "Linen", onHand: 86, par: 120, reserved: 36, unit: "ea" },
+    { id: "coffee-pods", item: "Coffee pods", category: "Amenity", onHand: 220, par: 300, reserved: 96, unit: "ea" },
+    { id: "bath-tissue", item: "Bath tissue", category: "Consumable", onHand: 44, par: 96, reserved: 28, unit: "rolls" },
+    { id: "dish-tabs", item: "Dishwasher tabs", category: "Consumable", onHand: 62, par: 80, reserved: 18, unit: "ea" },
+    { id: "hand-soap", item: "Hand soap", category: "Amenity", onHand: 38, par: 60, reserved: 14, unit: "bottles" },
+    { id: "trash-bags", item: "Trash bags", category: "Consumable", onHand: 110, par: 140, reserved: 42, unit: "ea" },
   ],
   jobs: [
     {
@@ -159,20 +86,17 @@ const defaultState = {
       cleanerId: "maya",
       inspector: "Jon Bell",
       linen: "delivered",
-      restockNeeded: ["coffee-pods", "bath-tissue"],
+      restockNeeded: ["coffee-pods", "bath-tissue", "hand-soap"],
       restockDone: ["coffee-pods"],
       completed: ["beds", "bathrooms", "floors"],
       photos: 3,
       updated: "12 min ago",
       blockers: [],
       issues: [
-        {
-          id: "issue-1",
-          type: "Maintenance",
-          title: "Loose towel bar in guest bath",
-          severity: "medium",
-          status: "open",
-        },
+        { id: "issue-1", type: "Maintenance", title: "Loose towel bar in guest bath", severity: "medium", status: "open" },
+      ],
+      addedItems: [
+        { id: "add-1", itemId: "coffee-pods", itemName: "Coffee pods", qty: 12, unit: "ea", area: "Kitchen", note: "Restocked counter jar", by: "Maya Chen", time: "12 min ago" },
       ],
     },
     {
@@ -197,14 +121,9 @@ const defaultState = {
       updated: "5 min ago",
       blockers: ["King sheets not delivered"],
       issues: [
-        {
-          id: "issue-2",
-          type: "Inventory",
-          title: "Missing king sheet set",
-          severity: "high",
-          status: "open",
-        },
+        { id: "issue-2", type: "Inventory", title: "Missing king sheet set", severity: "high", status: "open" },
       ],
+      addedItems: [],
     },
     {
       id: "atlas-2c",
@@ -228,6 +147,9 @@ const defaultState = {
       updated: "21 min ago",
       blockers: [],
       issues: [],
+      addedItems: [
+        { id: "add-2", itemId: "dish-tabs", itemName: "Dishwasher tabs", qty: 4, unit: "ea", area: "Kitchen", note: "", by: "Marco Diaz", time: "21 min ago" },
+      ],
     },
     {
       id: "arden-9",
@@ -244,13 +166,14 @@ const defaultState = {
       cleanerId: "sofia",
       inspector: "Marco Diaz",
       linen: "packed",
-      restockNeeded: ["queen-sheets", "bath-towels", "bath-tissue", "coffee-pods"],
+      restockNeeded: ["queen-sheets", "bath-towels", "bath-tissue", "coffee-pods", "trash-bags"],
       restockDone: [],
       completed: [],
       photos: 0,
       updated: "32 min ago",
       blockers: [],
       issues: [],
+      addedItems: [],
     },
     {
       id: "pier-3",
@@ -274,6 +197,9 @@ const defaultState = {
       updated: "48 min ago",
       blockers: [],
       issues: [],
+      addedItems: [
+        { id: "add-3", itemId: "bath-towels", itemName: "Bath towels", qty: 8, unit: "ea", area: "Bathroom", note: "Two sets per bath", by: "Jon Bell", time: "48 min ago" },
+      ],
     },
     {
       id: "civic-18d",
@@ -297,42 +223,32 @@ const defaultState = {
       updated: "9 min ago",
       blockers: ["Maintenance approval pending"],
       issues: [
-        {
-          id: "issue-3",
-          type: "Damage",
-          title: "Cracked dining chair",
-          severity: "high",
-          status: "open",
-        },
+        { id: "issue-3", type: "Damage", title: "Cracked dining chair", severity: "high", status: "open" },
+      ],
+      addedItems: [
+        { id: "add-4", itemId: "coffee-pods", itemName: "Coffee pods", qty: 10, unit: "ea", area: "Kitchen", note: "", by: "Maya Chen", time: "9 min ago" },
       ],
     },
   ],
 };
 
-let state = loadState();
-
 const statusConfig = {
-  assigned: { label: "Assigned", tone: "assigned", column: "assigned" },
-  "in-progress": { label: "In progress", tone: "progress", column: "progress" },
-  blocked: { label: "Blocked", tone: "blocked", column: "blocked" },
-  inspection: { label: "Inspection", tone: "inspection", column: "progress" },
-  ready: { label: "Ready", tone: "ready", column: "ready" },
+  assigned: { label: "Assigned", tone: "assigned" },
+  "in-progress": { label: "In progress", tone: "progress" },
+  blocked: { label: "Blocked", tone: "blocked" },
+  inspection: { label: "Inspection", tone: "inspection" },
+  ready: { label: "Ready", tone: "ready" },
 };
-
-const boardColumns = [
-  { id: "assigned", label: "Assigned" },
-  { id: "progress", label: "In progress" },
-  { id: "blocked", label: "Blocked" },
-  { id: "ready", label: "Ready" },
-];
 
 const viewTitles = {
-  dashboard: "Readiness Dashboard",
-  inventory: "Linen & Stock",
+  manager: "Manager Dashboard",
+  cleaner: "Cleaner Portal",
+  inventory: "Inventory",
   sync: "Booking Sync",
-  team: "Cleaner Load",
-  templates: "Turnover Templates",
+  team: "Team",
 };
+
+let state = loadState();
 
 const appView = document.querySelector("#appView");
 const viewTitle = document.querySelector("#viewTitle");
@@ -347,16 +263,48 @@ render();
 function loadState() {
   try {
     const stored = localStorage.getItem("turnready-state");
-    if (!stored) return structuredClone(defaultState);
-    const parsed = JSON.parse(stored);
-    return {
-      ...structuredClone(defaultState),
-      ...parsed,
-      filters: { ...defaultState.filters, ...parsed.filters },
-    };
+    return normalizeState(stored ? JSON.parse(stored) : defaultState);
   } catch {
     return structuredClone(defaultState);
   }
+}
+
+function normalizeState(raw) {
+  const base = structuredClone(defaultState);
+  const incoming = raw || {};
+  const normalized = {
+    ...base,
+    ...incoming,
+    filters: { ...base.filters, ...(incoming.filters || {}) },
+    calendarSources: incoming.calendarSources || base.calendarSources,
+    inventory: incoming.inventory || base.inventory,
+    jobs: (incoming.jobs || base.jobs).map((job) => ({
+      completed: [],
+      restockNeeded: [],
+      restockDone: [],
+      blockers: [],
+      issues: [],
+      addedItems: [],
+      photos: 0,
+      ...job,
+    })),
+  };
+
+  if (normalized.activeView === "dashboard" || !viewTitles[normalized.activeView]) {
+    normalized.activeView = "manager";
+  }
+  if (!normalized.jobs.some((job) => job.id === normalized.selectedJobId)) {
+    normalized.selectedJobId = normalized.jobs[0]?.id || "";
+  }
+  if (!cleaners.some((cleaner) => cleaner.id === normalized.activeCleanerId)) {
+    normalized.activeCleanerId = cleaners[0].id;
+  }
+  if (!normalized.jobs.some((job) => job.id === normalized.cleanerSelectedJobId)) {
+    normalized.cleanerSelectedJobId =
+      normalized.jobs.find((job) => job.cleanerId === normalized.activeCleanerId)?.id ||
+      normalized.selectedJobId;
+  }
+  return normalized;
 }
 
 function saveState() {
@@ -368,16 +316,16 @@ function render() {
   updateNav();
   updateSidebarCard();
 
-  if (state.activeView === "inventory") {
+  if (state.activeView === "cleaner") {
+    appView.innerHTML = renderCleanerView();
+  } else if (state.activeView === "inventory") {
     appView.innerHTML = renderInventoryView();
   } else if (state.activeView === "sync") {
     appView.innerHTML = renderSyncView();
   } else if (state.activeView === "team") {
     appView.innerHTML = renderTeamView();
-  } else if (state.activeView === "templates") {
-    appView.innerHTML = renderTemplatesView();
   } else {
-    appView.innerHTML = renderDashboardView();
+    appView.innerHTML = renderManagerView();
   }
 }
 
@@ -388,240 +336,245 @@ function updateNav() {
 }
 
 function updateSidebarCard() {
-  const sorted = [...state.jobs]
+  const next = [...state.jobs]
     .filter((job) => job.status !== "ready")
-    .sort((a, b) => timeToMinutes(a.checkin) - timeToMinutes(b.checkin));
-  const next = sorted[0] || state.jobs.find((job) => job.status === "ready");
-  document.querySelector("#nextCheckin").textContent = next
-    ? `${next.checkin} ${next.unit}`
-    : "--";
+    .sort((a, b) => timeToMinutes(a.checkin) - timeToMinutes(b.checkin))[0];
+  document.querySelector("#nextCheckin").textContent = next ? `${next.checkin} ${next.unit}` : "--";
   document.querySelector("#nextCheckinMeta").textContent = next
     ? `${getCleaner(next.cleanerId).name} / ${formatStatus(next.status)}`
     : "No turns scheduled";
 }
 
-function renderDashboardView() {
-  const jobs = getFilteredJobs();
+function renderManagerView() {
   const selected = getSelectedJob();
+  const jobs = getManagerJobs();
   return `
-    <div class="dashboard-grid">
-      <div class="main-column">
-        <section class="summary-band">
-          <div class="summary-photo">
-            <img src="assets/turnover-ready-room.png" alt="Guest-ready bedroom with fresh linens and towel cart" />
+    <div class="manager-grid">
+      <section class="manager-main">
+        <div class="today-band">
+          <div class="today-copy">
+            <span class="eyebrow">Manager dashboard</span>
+            <h2>${countReady()} ready, ${countBlocked()} blocked, ${countSameDay()} same-day turns</h2>
+            <div class="mini-metrics">
+              ${renderMetric("Open issues", countOpenIssues())}
+              ${renderMetric("Cleaner logs", countAddedItems())}
+              ${renderMetric("Low stock", countLowStock())}
+            </div>
           </div>
-          <div class="kpi-grid">
-            ${renderKpiCards()}
-          </div>
-        </section>
+          <img src="assets/turnover-ready-room.png" alt="Guest-ready bedroom with fresh linens" />
+        </div>
 
         <section class="panel">
           <div class="panel-header">
             <div>
               <span class="eyebrow">Today</span>
-              <h2>Turnover Board</h2>
+              <h2>Turnovers</h2>
             </div>
-            <div class="toolbar">
-              <span class="tag same-day">${countSameDay()} same-day</span>
-              <span class="tag blocker">${countBlocked()} blocked</span>
+            <div class="segmented">
+              ${renderFilterButton("attention", "Attention")}
+              ${renderFilterButton("all", "All")}
+              ${renderFilterButton("same-day", "Same-day")}
+              ${renderFilterButton("ready", "Ready")}
             </div>
           </div>
-          <div class="panel-body">
-            ${renderControls()}
-            ${renderBoard(jobs)}
+          <div class="turn-list">
+            ${jobs.length ? jobs.map(renderManagerTurnRow).join("") : `<div class="empty">No turnovers match this view</div>`}
           </div>
         </section>
-      </div>
+      </section>
 
-      <aside class="panel inspector">
-        ${selected ? renderInspector(selected) : `<div class="empty">No turnover selected</div>`}
+      <aside class="manager-side">
+        ${renderManagerDetail(selected)}
       </aside>
     </div>
   `;
 }
 
-function renderKpiCards() {
-  const total = state.jobs.length;
-  const ready = state.jobs.filter((job) => job.status === "ready").length;
-  const blocked = countBlocked();
-  const progress =
-    Math.round(
-      state.jobs.reduce((sum, job) => sum + getProgress(job), 0) / Math.max(total, 1)
-    ) || 0;
-  const lowStock = state.inventory.filter((item) => inventoryRisk(item) === "low").length;
-
-  return [
-    { label: "Ready for arrival", value: `${ready}/${total}`, hint: "units cleared" },
-    { label: "Blocked turns", value: blocked, hint: "need manager action" },
-    { label: "Avg. checklist", value: `${progress}%`, hint: "completion across jobs" },
-    { label: "Low-stock items", value: lowStock, hint: "below operating par" },
-  ]
-    .map(
-      (item) => `
-        <div class="kpi">
-          <span>${item.label}</span>
-          <strong>${item.value}</strong>
-          <span>${item.hint}</span>
-        </div>
-      `
-    )
-    .join("");
-}
-
-function renderControls() {
+function renderMetric(label, value) {
   return `
-    <div class="controls">
-      <input class="field" id="searchJobs" type="search" value="${escapeAttr(
-        state.filters.search
-      )}" placeholder="Search property, unit, guest" />
-      <select class="select" id="filterCleaner">
-        <option value="all">All cleaners</option>
-        ${cleaners
-          .map(
-            (cleaner) =>
-              `<option value="${cleaner.id}" ${
-                state.filters.cleaner === cleaner.id ? "selected" : ""
-              }>${cleaner.name}</option>`
-          )
-          .join("")}
-      </select>
-      <select class="select" id="filterRisk">
-        <option value="all">All risk levels</option>
-        <option value="blocked" ${state.filters.risk === "blocked" ? "selected" : ""}>Blocked</option>
-        <option value="same-day" ${state.filters.risk === "same-day" ? "selected" : ""}>Same-day</option>
-        <option value="ready" ${state.filters.risk === "ready" ? "selected" : ""}>Ready</option>
-      </select>
+    <div class="metric">
+      <strong>${value}</strong>
+      <span>${label}</span>
     </div>
   `;
 }
 
-function renderBoard(jobs) {
+function renderFilterButton(filter, label) {
   return `
-    <div class="board" role="list">
-      ${boardColumns
-        .map((column) => {
-          const columnJobs = jobs.filter(
-            (job) => statusConfig[job.status].column === column.id
-          );
-          return `
-            <section class="board-column" aria-label="${column.label}">
-              <div class="column-header">
-                <span>${column.label}</span>
-                <span class="count-pill">${columnJobs.length}</span>
-              </div>
-              ${
-                columnJobs.length
-                  ? columnJobs.map(renderJobCard).join("")
-                  : `<div class="empty">No turns</div>`
-              }
-            </section>
-          `;
-        })
-        .join("")}
-    </div>
+    <button class="segmented-button ${state.managerFilter === filter ? "is-active" : ""}" data-manager-filter="${filter}" type="button">
+      ${label}
+    </button>
   `;
 }
 
-function renderJobCard(job) {
+function renderManagerTurnRow(job) {
   const progress = getProgress(job);
-  const status = statusConfig[job.status];
-  const classes = [
-    "job-card",
-    state.selectedJobId === job.id ? "is-selected" : "",
-    job.status === "blocked" ? "is-blocked" : "",
-    job.status === "ready" ? "is-ready" : "",
-    job.status === "inspection" ? "is-inspection" : "",
-  ]
-    .filter(Boolean)
-    .join(" ");
+  const open = openIssues(job).length;
+  const restock = `${job.restockDone.length}/${job.restockNeeded.length || 0}`;
   return `
-    <button class="${classes}" data-select-job="${job.id}" type="button">
-      <div class="job-title">
-        <div>
-          <strong>${job.unit}</strong>
-          <div class="job-meta">${job.property} / ${job.area}</div>
-        </div>
-        <span class="status-pill ${status.tone}">${status.label}</span>
+    <button class="turn-row ${state.selectedJobId === job.id ? "is-selected" : ""}" data-select-job="${job.id}" type="button">
+      <div>
+        <strong>${job.unit}</strong>
+        <span>${job.property} / ${job.area}</span>
       </div>
-      <div class="small-meta">
-        ${job.checkout} checkout / ${job.checkin} check-in<br />
-        ${getCleaner(job.cleanerId).name} / ${job.guest}
+      <div>
+        <strong>${job.checkin}</strong>
+        <span>${job.channel}</span>
       </div>
-      <div class="progress-track" aria-label="${progress}% complete">
-        <div class="progress-fill ${progress < 40 ? "danger" : progress < 70 ? "warn" : ""}" style="--value: ${progress}%"></div>
+      <div>
+        <strong>${getCleaner(job.cleanerId).name}</strong>
+        <span>${job.linen === "delivered" ? "Linen ready" : linenLabel(job.linen)}</span>
       </div>
-      <div class="tag-row">
+      <div class="row-progress">
+        <span class="status-pill ${statusConfig[job.status].tone}">${formatStatus(job.status)}</span>
+        <div class="progress-track"><div class="progress-fill ${progress < 40 ? "danger" : progress < 75 ? "warn" : ""}" style="--value:${progress}%"></div></div>
+      </div>
+      <div class="row-flags">
         ${job.priority === "same-day" ? `<span class="tag same-day">same-day</span>` : ""}
-        ${job.priority === "early-checkin" ? `<span class="tag same-day">early</span>` : ""}
-        ${job.linen !== "delivered" ? `<span class="tag blocker">${linenLabel(job.linen)}</span>` : ""}
-        ${hasBlockingIssue(job) ? `<span class="tag blocker">issue open</span>` : ""}
-        ${job.status === "ready" ? `<span class="tag ready">guest-ready</span>` : ""}
+        ${open ? `<span class="tag blocker">${open} issue${open > 1 ? "s" : ""}</span>` : ""}
+        <span class="tag">restock ${restock}</span>
       </div>
     </button>
   `;
 }
 
-function renderInspector(job) {
-  const progress = getProgress(job);
-  const ready = canMarkReady(job);
-  const completedText = `${job.completed.length}/${checklistTemplate.length}`;
+function renderManagerDetail(job) {
+  if (!job) return `<section class="panel"><div class="empty">No turnover selected</div></section>`;
+  return `
+    <section class="panel sticky-panel">
+      <div class="panel-header">
+        <div>
+          <span class="eyebrow">Selected turn</span>
+          <h2>${job.unit}</h2>
+        </div>
+        <span class="status-pill ${statusConfig[job.status].tone}">${formatStatus(job.status)}</span>
+      </div>
+      <div class="panel-body detail-stack">
+        <div class="detail-grid">
+          ${renderDetail("Check-in", job.checkin)}
+          ${renderDetail("Guest", job.guest)}
+          ${renderDetail("Cleaner", getCleaner(job.cleanerId).name)}
+          ${renderDetail("Checklist", `${job.completed.length}/${checklistTemplate.length}`)}
+        </div>
+
+        <div class="section-block">
+          <div class="section-head">
+            <h3>Manager actions</h3>
+            <span class="small-meta">Updated ${job.updated}</span>
+          </div>
+          <div class="status-actions">
+            ${Object.entries(statusConfig).map(([status, config]) => `
+              <button class="chip-button ${job.status === status ? "is-active" : ""}" type="button" data-status="${status}" data-job="${job.id}">
+                ${config.label}
+              </button>
+            `).join("")}
+          </div>
+          <div class="two-field-grid">
+            <select class="select" data-assign-cleaner="${job.id}">
+              ${cleaners.map((cleaner) => `<option value="${cleaner.id}" ${job.cleanerId === cleaner.id ? "selected" : ""}>${cleaner.name}</option>`).join("")}
+            </select>
+            <select class="select" data-linen-select="${job.id}">
+              ${["needed", "packed", "delivered"].map((value) => `<option value="${value}" ${job.linen === value ? "selected" : ""}>${linenLabel(value)}</option>`).join("")}
+            </select>
+          </div>
+        </div>
+
+        <div class="section-block">
+          <div class="section-head">
+            <h3>Restock</h3>
+            <span class="small-meta">${job.restockDone.length}/${job.restockNeeded.length} done</span>
+          </div>
+          <div class="checklist compact">
+            ${job.restockNeeded.map((itemId) => renderRestockCheck(job, itemId)).join("") || `<div class="empty small">No restock needed</div>`}
+          </div>
+        </div>
+
+        <div class="section-block">
+          <div class="section-head">
+            <h3>Cleaner supply log</h3>
+            <span class="small-meta">${job.addedItems.length} entries</span>
+          </div>
+          ${renderAddedItems(job, true)}
+        </div>
+
+        <div class="section-block">
+          <div class="section-head">
+            <h3>Issues</h3>
+            <span class="small-meta">${openIssues(job).length} open</span>
+          </div>
+          <div class="issue-list">
+            ${job.issues.length ? job.issues.map((issue) => renderIssue(job, issue)).join("") : `<div class="empty small">No issues reported</div>`}
+          </div>
+          ${renderIssueForm(job.id)}
+        </div>
+
+        <button class="button primary" data-ready="${job.id}" type="button" ${canMarkReady(job) ? "" : "disabled"}>Mark guest-ready</button>
+      </div>
+    </section>
+  `;
+}
+
+function renderCleanerView() {
+  const activeCleaner = getCleaner(state.activeCleanerId);
+  const cleanerJobs = state.jobs.filter((job) => job.cleanerId === activeCleaner.id);
+  const selected =
+    cleanerJobs.find((job) => job.id === state.cleanerSelectedJobId) ||
+    cleanerJobs.find((job) => job.status !== "ready") ||
+    cleanerJobs[0];
+
+  return `
+    <div class="cleaner-grid">
+      <section class="cleaner-main">
+        <div class="cleaner-top">
+          <div>
+            <span class="eyebrow">Cleaner portal</span>
+            <h2>${activeCleaner.name}</h2>
+          </div>
+          <select class="select cleaner-select" id="activeCleaner">
+            ${cleaners.map((cleaner) => `<option value="${cleaner.id}" ${cleaner.id === activeCleaner.id ? "selected" : ""}>${cleaner.name}</option>`).join("")}
+          </select>
+        </div>
+
+        <div class="job-strip">
+          ${cleanerJobs.length ? cleanerJobs.map(renderCleanerJobCard).join("") : `<div class="empty">No jobs assigned</div>`}
+        </div>
+      </section>
+
+      <section class="panel work-order">
+        ${selected ? renderCleanerWorkOrder(selected) : `<div class="empty">Select a cleaner with assigned jobs</div>`}
+      </section>
+    </div>
+  `;
+}
+
+function renderCleanerJobCard(job) {
+  return `
+    <button class="cleaner-card ${state.cleanerSelectedJobId === job.id ? "is-selected" : ""}" data-cleaner-job="${job.id}" type="button">
+      <div class="cleaner-card-top">
+        <strong>${job.unit}</strong>
+        <span class="status-pill ${statusConfig[job.status].tone}">${formatStatus(job.status)}</span>
+      </div>
+      <span>${job.checkin} check-in / ${job.area}</span>
+      <div class="progress-track"><div class="progress-fill" style="--value:${getProgress(job)}%"></div></div>
+    </button>
+  `;
+}
+
+function renderCleanerWorkOrder(job) {
   return `
     <div class="panel-header">
-      <div class="unit-heading">
-        <span class="eyebrow">Turnover detail</span>
-        <div class="unit-row">
-          <div>
-            <h2>${job.unit}</h2>
-            <div class="job-meta">${job.property} / ${job.beds}</div>
-          </div>
-          <span class="status-pill ${statusConfig[job.status].tone}">${formatStatus(job.status)}</span>
-        </div>
+      <div>
+        <span class="eyebrow">${job.property}</span>
+        <h2>${job.unit}</h2>
       </div>
+      <span class="status-pill ${statusConfig[job.status].tone}">${formatStatus(job.status)}</span>
     </div>
-    <div class="panel-body">
+    <div class="panel-body cleaner-work">
       <div class="detail-grid">
-        <div class="detail"><span>Check-out</span><strong>${job.checkout}</strong></div>
-        <div class="detail"><span>Check-in</span><strong>${job.checkin}</strong></div>
-        <div class="detail"><span>Guest</span><strong>${job.guest}</strong></div>
-        <div class="detail"><span>Channel</span><strong>${job.channel}</strong></div>
-      </div>
-
-      <div class="section-block">
-        <div class="section-head">
-          <h3>Owner</h3>
-          <span class="small-meta">Updated ${job.updated}</span>
-        </div>
-        <select class="select" data-assign-cleaner="${job.id}">
-          ${cleaners
-            .map(
-              (cleaner) =>
-                `<option value="${cleaner.id}" ${
-                  cleaner.id === job.cleanerId ? "selected" : ""
-                }>${cleaner.name} / ${cleaner.zone}</option>`
-            )
-            .join("")}
-        </select>
-      </div>
-
-      <div class="section-block">
-        <div class="section-head">
-          <h3>Status</h3>
-          <span class="small-meta">${completedText} checks</span>
-        </div>
-        <div class="status-actions" role="group" aria-label="Turnover status">
-          ${Object.entries(statusConfig)
-            .map(
-              ([status, config]) => `
-                <button class="chip-button ${job.status === status ? "is-active" : ""}" type="button" data-status="${status}" data-job="${job.id}">
-                  ${config.label}
-                </button>
-              `
-            )
-            .join("")}
-        </div>
-        <div class="progress-track" aria-label="${progress}% complete">
-          <div class="progress-fill ${progress < 40 ? "danger" : progress < 70 ? "warn" : ""}" style="--value: ${progress}%"></div>
-        </div>
+        ${renderDetail("Check-in", job.checkin)}
+        ${renderDetail("Guest", job.guest)}
+        ${renderDetail("Unit", job.beds)}
+        ${renderDetail("Photos", job.photos)}
       </div>
 
       <div class="section-block">
@@ -629,124 +582,81 @@ function renderInspector(job) {
           <h3>Checklist</h3>
           <button class="chip-button" type="button" data-complete-all="${job.id}">Complete all</button>
         </div>
-        <div class="checklist">
-          ${checklistTemplate.map((item) => renderChecklistItem(job, item)).join("")}
+        <div class="cleaner-checklist">
+          ${checklistTemplate.map((item) => renderCleanerCheck(job, item)).join("")}
+        </div>
+      </div>
+
+      <div class="section-block supply-entry">
+        <div class="section-head">
+          <h3>Items added</h3>
+          <span class="small-meta">${job.addedItems.length} logged</span>
+        </div>
+        <form class="add-item-form" data-add-item-form="${job.id}">
+          <select class="select" name="itemId" required>
+            ${state.inventory.map((item) => `<option value="${item.id}">${item.item} (${item.unit})</option>`).join("")}
+          </select>
+          <input class="field quantity-field" name="qty" type="number" min="1" value="1" required />
+          <select class="select" name="area">
+            <option>Kitchen</option>
+            <option>Bathroom</option>
+            <option>Bedroom</option>
+            <option>Laundry</option>
+            <option>Entry</option>
+          </select>
+          <input class="field" name="note" placeholder="Note" />
+          <button class="button primary" type="submit">Log item</button>
+        </form>
+        ${renderAddedItems(job, false)}
+      </div>
+
+      <div class="section-block">
+        <div class="section-head">
+          <h3>Restock targets</h3>
+          <span class="small-meta">${job.restockDone.length}/${job.restockNeeded.length} done</span>
+        </div>
+        <div class="checklist compact">
+          ${job.restockNeeded.map((itemId) => renderRestockCheck(job, itemId)).join("") || `<div class="empty small">No restock needed</div>`}
         </div>
       </div>
 
       <div class="section-block">
         <div class="section-head">
-          <h3>Linen & restock</h3>
-          <span class="small-meta">${linenLabel(job.linen)}</span>
-        </div>
-        <div class="segmented">
-          ${["needed", "packed", "delivered"]
-            .map(
-              (status) => `
-                <button class="chip-button ${job.linen === status ? "is-active" : ""}" data-linen="${status}" data-job="${job.id}" type="button">
-                  ${linenLabel(status)}
-                </button>
-              `
-            )
-            .join("")}
-        </div>
-        <div class="stock-list">
-          ${job.restockNeeded.map((itemId) => renderRestockItem(job, itemId)).join("")}
-        </div>
-      </div>
-
-      <div class="section-block">
-        <div class="section-head">
-          <h3>Issues</h3>
+          <h3>Report issue</h3>
           <span class="small-meta">${openIssues(job).length} open</span>
         </div>
-        <div class="issue-list">
-          ${job.issues.length ? job.issues.map((issue) => renderIssue(job, issue)).join("") : `<div class="empty">No issues reported</div>`}
-        </div>
-        <form class="inline-form" data-issue-form="${job.id}">
-          <input class="field" name="title" placeholder="Issue title" required />
-          <div class="inline-grid">
-            <select class="select" name="type">
-              <option>Maintenance</option>
-              <option>Inventory</option>
-              <option>Damage</option>
-              <option>Cleaning</option>
-            </select>
-            <select class="select" name="severity">
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
-              <option value="low">Low</option>
-            </select>
-          </div>
-          <button class="button" type="submit">Add issue</button>
-        </form>
+        ${renderIssueForm(job.id)}
       </div>
 
-      <button class="button primary" type="button" data-ready="${job.id}" ${ready ? "" : "disabled"}>
-        Mark guest-ready
-      </button>
+      <button class="button primary" data-finish-cleaner="${job.id}" type="button" ${job.completed.length ? "" : "disabled"}>Send to inspection</button>
     </div>
   `;
 }
 
-function renderChecklistItem(job, item) {
+function renderCleanerCheck(job, item) {
   const checked = job.completed.includes(item.id);
   return `
-    <label class="check-item">
+    <label class="clean-check ${checked ? "is-done" : ""}">
       <input type="checkbox" data-check="${item.id}" data-job="${job.id}" ${checked ? "checked" : ""} />
       <span>
         <strong>${item.label}</strong>
-        <span>${item.note}</span>
+        <small>${item.note}</small>
       </span>
     </label>
-  `;
-}
-
-function renderRestockItem(job, itemId) {
-  const item = state.inventory.find((stock) => stock.id === itemId);
-  const done = job.restockDone.includes(itemId);
-  if (!item) return "";
-  return `
-    <label class="check-item">
-      <input type="checkbox" data-restock="${item.id}" data-job="${job.id}" ${done ? "checked" : ""} />
-      <span>
-        <strong>${item.item}</strong>
-        <span>${item.onHand - item.reserved} ${item.unit} available after reservations</span>
-      </span>
-    </label>
-  `;
-}
-
-function renderIssue(job, issue) {
-  return `
-    <div class="issue">
-      <div class="issue-top">
-        <div class="issue-title">
-          <strong>${issue.title}</strong>
-          <span class="small-meta">${issue.type} / ${capitalize(issue.severity)} severity</span>
-        </div>
-        <span class="status-pill ${issue.status === "open" ? "blocked" : "ready"}">${issue.status}</span>
-      </div>
-      ${
-        issue.status === "open"
-          ? `<button class="chip-button" type="button" data-resolve-issue="${issue.id}" data-job="${job.id}">Resolve</button>`
-          : ""
-      }
-    </div>
   `;
 }
 
 function renderInventoryView() {
   const lowStock = state.inventory.filter((item) => inventoryRisk(item) === "low");
   return `
-    <div class="split-layout">
+    <div class="inventory-grid">
       <section class="panel table-panel">
         <div class="panel-header">
           <div>
             <span class="eyebrow">Stock room</span>
-            <h2>Inventory Position</h2>
+            <h2>Inventory</h2>
           </div>
-          <button class="button" type="button" data-simulate-restock>Receive stock</button>
+          <button class="button" type="button" data-simulate-restock>Receive to par</button>
         </div>
         <table>
           <thead>
@@ -754,7 +664,7 @@ function renderInventoryView() {
               <th>Item</th>
               <th>Category</th>
               <th>On hand</th>
-              <th>Reserved today</th>
+              <th>Reserved</th>
               <th>Par</th>
               <th>Status</th>
             </tr>
@@ -768,156 +678,15 @@ function renderInventoryView() {
       <aside class="panel">
         <div class="panel-header">
           <div>
-            <span class="eyebrow">Action list</span>
+            <span class="eyebrow">Needs order</span>
             <h2>Low Stock</h2>
           </div>
           <span class="count-pill">${lowStock.length}</span>
         </div>
         <div class="panel-body stock-list">
-          ${
-            lowStock.length
-              ? lowStock.map(renderLowStockCard).join("")
-              : `<div class="empty">Inventory is above par thresholds</div>`
-          }
+          ${lowStock.length ? lowStock.map(renderLowStockCard).join("") : `<div class="empty">Inventory is above low thresholds</div>`}
         </div>
       </aside>
-    </div>
-  `;
-}
-
-function renderSyncView() {
-  const activeSources = state.calendarSources.filter(
-    (source) => source.status === "connected"
-  ).length;
-  const conflicts = state.calendarSources.reduce(
-    (sum, source) => sum + source.conflicts,
-    0
-  );
-  const imported = state.calendarSources.reduce(
-    (sum, source) => sum + source.imported,
-    0
-  );
-
-  return `
-    <div class="sync-grid">
-      <section class="panel">
-        <div class="panel-header">
-          <div>
-            <span class="eyebrow">Channels</span>
-            <h2>Booking Sources</h2>
-          </div>
-          <div class="toolbar">
-            <button class="button" type="button" data-connect-guesty>Connect PMS</button>
-            <button class="button primary" type="button" data-sync-all>Sync now</button>
-          </div>
-        </div>
-        <div class="panel-body">
-          <div class="metric-row">
-            <div class="kpi">
-              <span>Active sources</span>
-              <strong>${activeSources}</strong>
-              <span>PMS and calendar feeds</span>
-            </div>
-            <div class="kpi">
-              <span>Reservations imported</span>
-              <strong>${imported}</strong>
-              <span>rolling 90-day window</span>
-            </div>
-            <div class="kpi">
-              <span>Calendar conflicts</span>
-              <strong>${conflicts}</strong>
-              <span>need review before assigning</span>
-            </div>
-            <div class="kpi">
-              <span>Today from feeds</span>
-              <strong>${state.jobs.length}</strong>
-              <span>turnovers generated</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <aside class="panel">
-        <div class="panel-header">
-          <div>
-            <span class="eyebrow">Add feed</span>
-            <h2>Import iCal URL</h2>
-          </div>
-        </div>
-        <div class="panel-body">
-          <form class="inline-form" data-ical-form>
-            <input class="field" name="name" placeholder="Source name, e.g. Airbnb Beach Unit" required />
-            <input class="field" name="url" placeholder="https://.../calendar.ics" required />
-            <select class="select" name="type">
-              <option value="Airbnb iCal">Airbnb iCal</option>
-              <option value="Booking.com iCal">Booking.com iCal</option>
-              <option value="Vrbo iCal">Vrbo iCal</option>
-              <option value="Other iCal">Other iCal</option>
-            </select>
-            <button class="button primary" type="submit">Add calendar feed</button>
-          </form>
-        </div>
-      </aside>
-
-      <section class="panel">
-        <div class="panel-header">
-          <div>
-            <span class="eyebrow">Feed health</span>
-            <h2>Connected Calendars</h2>
-          </div>
-        </div>
-        <div class="panel-body source-grid">
-          ${state.calendarSources.map(renderCalendarSource).join("")}
-        </div>
-      </section>
-
-      <section class="panel">
-        <div class="panel-header">
-          <div>
-            <span class="eyebrow">Import rules</span>
-            <h2>Turnover Automation</h2>
-          </div>
-        </div>
-        <div class="panel-body template-list">
-          ${renderSyncRule("Reservation imported", "Create turnover between check-out and next check-in.")}
-          ${renderSyncRule("Same-day arrival detected", "Raise priority and require completion photos.")}
-          ${renderSyncRule("Calendar conflict found", "Hold unit in blocked state until a manager reviews overlap.")}
-          ${renderSyncRule("Guesty PMS connected", "Prefer PMS reservation details over iCal-only placeholders.")}
-        </div>
-      </section>
-    </div>
-  `;
-}
-
-function renderCalendarSource(source) {
-  const paused = source.status === "paused";
-  return `
-    <div class="source-card ${paused ? "is-paused" : ""}">
-      <div class="source-type">
-        <div>
-          <strong>${escapeHtml(source.name)}</strong>
-          <div class="small-meta">${escapeHtml(source.type)} / ${escapeHtml(source.syncMode)}</div>
-        </div>
-        <span class="status-pill ${paused ? "assigned" : "ready"}">${paused ? "Paused" : "Connected"}</span>
-      </div>
-      <div class="url-chip" title="${escapeAttr(source.url)}">${escapeHtml(source.url)}</div>
-      <div class="detail-grid">
-        <div class="detail"><span>Last sync</span><strong>${source.lastSync}</strong></div>
-        <div class="detail"><span>Conflicts</span><strong>${source.conflicts}</strong></div>
-      </div>
-      <div class="source-actions">
-        <button class="chip-button" type="button" data-toggle-source="${source.id}">${paused ? "Resume" : "Pause"}</button>
-        <button class="chip-button" type="button" data-remove-source="${source.id}">Remove</button>
-      </div>
-    </div>
-  `;
-}
-
-function renderSyncRule(title, detail) {
-  return `
-    <div class="template-row">
-      <strong>${title}</strong>
-      <span class="small-meta">${detail}</span>
     </div>
   `;
 }
@@ -935,9 +704,7 @@ function renderInventoryRow(item) {
       <td>
         <div class="stock-meter">
           <span class="status-pill ${risk === "low" ? "blocked" : risk === "watch" ? "assigned" : "ready"}">${risk === "low" ? "Low" : risk === "watch" ? "Watch" : "Healthy"}</span>
-          <div class="progress-track">
-            <div class="progress-fill ${risk === "low" ? "danger" : risk === "watch" ? "warn" : ""}" style="--value: ${percent}%"></div>
-          </div>
+          <div class="progress-track"><div class="progress-fill ${risk === "low" ? "danger" : risk === "watch" ? "warn" : ""}" style="--value:${percent}%"></div></div>
         </div>
       </td>
     </tr>
@@ -945,143 +712,212 @@ function renderInventoryRow(item) {
 }
 
 function renderLowStockCard(item) {
-  const shortage = Math.max(item.par - item.onHand, 0);
   return `
     <div class="stock-row">
-      <div class="stock-top">
-        <div>
-          <strong>${item.item}</strong>
-          <div class="small-meta">${item.category}</div>
-        </div>
-        <span class="status-pill blocked">Order ${shortage}</span>
+      <div>
+        <strong>${item.item}</strong>
+        <span>${item.onHand - item.reserved} ${item.unit} available after reservations</span>
       </div>
-      <div class="small-meta">${item.reserved} ${item.unit} already reserved for today</div>
+      <span class="status-pill blocked">Order ${Math.max(item.par - item.onHand, 0)}</span>
+    </div>
+  `;
+}
+
+function renderSyncView() {
+  const activeSources = state.calendarSources.filter((source) => source.status === "connected").length;
+  const conflicts = state.calendarSources.reduce((sum, source) => sum + source.conflicts, 0);
+  const imported = state.calendarSources.reduce((sum, source) => sum + source.imported, 0);
+
+  return `
+    <div class="sync-grid">
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <span class="eyebrow">Channels</span>
+            <h2>Booking Sources</h2>
+          </div>
+          <div class="toolbar">
+            <button class="button" type="button" data-connect-guesty>Connect PMS</button>
+            <button class="button primary" type="button" data-sync-all>Sync now</button>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="mini-metrics four">
+            ${renderMetric("Active sources", activeSources)}
+            ${renderMetric("Imported", imported)}
+            ${renderMetric("Conflicts", conflicts)}
+            ${renderMetric("Today", state.jobs.length)}
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel">
+        <div class="panel-header">
+          <div>
+            <span class="eyebrow">iCal</span>
+            <h2>Add Calendar</h2>
+          </div>
+        </div>
+        <div class="panel-body">
+          <form class="inline-form" data-ical-form>
+            <input class="field" name="name" placeholder="Source name" required />
+            <input class="field" name="url" placeholder="https://.../calendar.ics" required />
+            <select class="select" name="type">
+              <option value="Airbnb iCal">Airbnb iCal</option>
+              <option value="Booking.com iCal">Booking.com iCal</option>
+              <option value="Vrbo iCal">Vrbo iCal</option>
+              <option value="Other iCal">Other iCal</option>
+            </select>
+            <button class="button primary" type="submit">Add feed</button>
+          </form>
+        </div>
+      </aside>
+
+      <section class="panel span-all">
+        <div class="panel-header">
+          <div>
+            <span class="eyebrow">Feed health</span>
+            <h2>Connected Calendars</h2>
+          </div>
+        </div>
+        <div class="panel-body source-grid">
+          ${state.calendarSources.map(renderCalendarSource).join("")}
+        </div>
+      </section>
+    </div>
+  `;
+}
+
+function renderCalendarSource(source) {
+  const paused = source.status === "paused";
+  return `
+    <div class="source-card ${paused ? "is-paused" : ""}">
+      <div class="source-type">
+        <div>
+          <strong>${escapeHtml(source.name)}</strong>
+          <span>${escapeHtml(source.type)} / ${escapeHtml(source.syncMode)}</span>
+        </div>
+        <span class="status-pill ${paused ? "assigned" : "ready"}">${paused ? "Paused" : "Connected"}</span>
+      </div>
+      <div class="url-chip" title="${escapeAttr(source.url)}">${escapeHtml(source.url)}</div>
+      <div class="detail-grid">
+        ${renderDetail("Last sync", source.lastSync)}
+        ${renderDetail("Conflicts", source.conflicts)}
+      </div>
+      <div class="source-actions">
+        <button class="chip-button" type="button" data-toggle-source="${source.id}">${paused ? "Resume" : "Pause"}</button>
+        <button class="chip-button" type="button" data-remove-source="${source.id}">Remove</button>
+      </div>
     </div>
   `;
 }
 
 function renderTeamView() {
   return `
-    <div class="split-layout">
-      <section class="panel">
-        <div class="panel-header">
-          <div>
-            <span class="eyebrow">Field team</span>
-            <h2>Assignments</h2>
-          </div>
-          <span class="count-pill">${state.jobs.length} turns</span>
-        </div>
-        <div class="panel-body team-list">
-          ${cleaners.map(renderCleanerRow).join("")}
-        </div>
-      </section>
-
-      <section class="panel">
-        <div class="panel-header">
-          <div>
-            <span class="eyebrow">Arrival order</span>
-            <h2>Check-in Timeline</h2>
-          </div>
-        </div>
-        <div class="panel-body timeline">
-          ${[...state.jobs]
-            .sort((a, b) => timeToMinutes(a.checkin) - timeToMinutes(b.checkin))
-            .map(renderTimelineRow)
-            .join("")}
-        </div>
-      </section>
+    <div class="team-grid">
+      ${cleaners.map(renderCleanerLoad).join("")}
     </div>
   `;
 }
 
-function renderCleanerRow(cleaner) {
+function renderCleanerLoad(cleaner) {
   const assigned = state.jobs.filter((job) => job.cleanerId === cleaner.id);
   const active = assigned.filter((job) => job.status !== "ready").length;
   const percent = Math.min(Math.round((active / cleaner.capacity) * 100), 100);
   return `
-    <div class="team-row">
-      <div class="team-top">
-        <div>
-          <strong>${cleaner.name}</strong>
-          <div class="small-meta">${cleaner.zone} / ${active} active of ${cleaner.capacity}</div>
-        </div>
-        <span class="status-pill ${active > cleaner.capacity ? "blocked" : active === cleaner.capacity ? "assigned" : "ready"}">${active > cleaner.capacity ? "Over" : "Available"}</span>
-      </div>
-      <div class="progress-track">
-        <div class="progress-fill ${percent > 90 ? "danger" : percent > 70 ? "warn" : ""}" style="--value: ${percent}%"></div>
-      </div>
-      <div class="tag-row">
-        ${assigned
-          .map(
-            (job) =>
-              `<button class="chip-button" type="button" data-open-job="${job.id}">${job.unit}</button>`
-          )
-          .join("")}
-      </div>
-    </div>
-  `;
-}
-
-function renderTimelineRow(job) {
-  return `
-    <div class="timeline-row">
-      <div class="timeline-time">${job.checkin}</div>
-      <div>
-        <div class="timeline-top">
-          <strong>${job.unit}</strong>
-          <span class="status-pill ${statusConfig[job.status].tone}">${formatStatus(job.status)}</span>
-        </div>
-        <div class="small-meta">${job.guest} / ${getCleaner(job.cleanerId).name} / ${job.area}</div>
-      </div>
-    </div>
-  `;
-}
-
-function renderTemplatesView() {
-  const grouped = checklistTemplate.reduce((groups, item) => {
-    groups[item.group] ||= [];
-    groups[item.group].push(item);
-    return groups;
-  }, {});
-  return `
-    <section class="panel">
+    <section class="panel team-card">
       <div class="panel-header">
         <div>
-          <span class="eyebrow">Standard turn</span>
-          <h2>Checklist Template</h2>
+          <span class="eyebrow">${cleaner.zone}</span>
+          <h2>${cleaner.name}</h2>
         </div>
-        <span class="count-pill">${checklistTemplate.length} checks</span>
+        <span class="status-pill ${active >= cleaner.capacity ? "assigned" : "ready"}">${active}/${cleaner.capacity}</span>
       </div>
-      <div class="panel-body template-list">
-        ${Object.entries(grouped)
-          .map(
-            ([group, items]) => `
-              <div class="template-row">
-                <div class="section-head">
-                  <h3>${group}</h3>
-                  <span class="small-meta">${items.length} items</span>
-                </div>
-                <div class="checklist">
-                  ${items
-                    .map(
-                      (item) => `
-                        <div class="check-item">
-                          <span class="nav-symbol" aria-hidden="true"></span>
-                          <span>
-                            <strong>${item.label}</strong>
-                            <span>${item.note}</span>
-                          </span>
-                        </div>
-                      `
-                    )
-                    .join("")}
-                </div>
-              </div>
-            `
-          )
-          .join("")}
+      <div class="panel-body detail-stack">
+        <div class="progress-track"><div class="progress-fill ${percent > 90 ? "danger" : percent > 70 ? "warn" : ""}" style="--value:${percent}%"></div></div>
+        <div class="tag-row">
+          ${assigned.map((job) => `<button class="chip-button" type="button" data-open-cleaner-job="${job.id}" data-cleaner="${cleaner.id}">${job.unit}</button>`).join("")}
+        </div>
       </div>
     </section>
+  `;
+}
+
+function renderDetail(label, value) {
+  return `
+    <div class="detail">
+      <span>${label}</span>
+      <strong>${value}</strong>
+    </div>
+  `;
+}
+
+function renderRestockCheck(job, itemId) {
+  const item = getInventoryItem(itemId);
+  if (!item) return "";
+  const checked = job.restockDone.includes(itemId);
+  return `
+    <label class="check-item">
+      <input type="checkbox" data-restock="${item.id}" data-job="${job.id}" ${checked ? "checked" : ""} />
+      <span>
+        <strong>${item.item}</strong>
+        <small>${item.onHand - item.reserved} ${item.unit} available</small>
+      </span>
+    </label>
+  `;
+}
+
+function renderAddedItems(job, compact) {
+  if (!job.addedItems.length) return `<div class="empty small">No items logged yet</div>`;
+  const items = compact ? job.addedItems.slice(0, 4) : job.addedItems;
+  return `
+    <div class="added-list">
+      ${items.map((entry) => `
+        <div class="added-row">
+          <div>
+            <strong>${escapeHtml(entry.itemName)}</strong>
+            <span>${entry.qty} ${escapeHtml(entry.unit)} / ${escapeHtml(entry.area)} / ${escapeHtml(entry.by)}</span>
+            ${entry.note ? `<small>${escapeHtml(entry.note)}</small>` : ""}
+          </div>
+          <button class="icon-button" title="Remove entry" aria-label="Remove entry" data-remove-added="${entry.id}" data-job="${job.id}" type="button">x</button>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderIssue(job, issue) {
+  return `
+    <div class="issue">
+      <div>
+        <strong>${escapeHtml(issue.title)}</strong>
+        <span>${escapeHtml(issue.type)} / ${capitalize(issue.severity)}</span>
+      </div>
+      <span class="status-pill ${issue.status === "open" ? "blocked" : "ready"}">${issue.status}</span>
+      ${issue.status === "open" ? `<button class="chip-button" type="button" data-resolve-issue="${issue.id}" data-job="${job.id}">Resolve</button>` : ""}
+    </div>
+  `;
+}
+
+function renderIssueForm(jobId) {
+  return `
+    <form class="inline-form" data-issue-form="${jobId}">
+      <input class="field" name="title" placeholder="Issue title" required />
+      <div class="two-field-grid">
+        <select class="select" name="type">
+          <option>Maintenance</option>
+          <option>Inventory</option>
+          <option>Damage</option>
+          <option>Cleaning</option>
+        </select>
+        <select class="select" name="severity">
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+          <option value="low">Low</option>
+        </select>
+      </div>
+      <button class="button" type="submit">Add issue</button>
+    </form>
   `;
 }
 
@@ -1089,6 +925,14 @@ function handleClick(event) {
   const navButton = event.target.closest("[data-view]");
   if (navButton) {
     state.activeView = navButton.dataset.view;
+    saveState();
+    render();
+    return;
+  }
+
+  const filterButton = event.target.closest("[data-manager-filter]");
+  if (filterButton) {
+    state.managerFilter = filterButton.dataset.managerFilter;
     saveState();
     render();
     return;
@@ -1102,10 +946,19 @@ function handleClick(event) {
     return;
   }
 
-  const openJob = event.target.closest("[data-open-job]");
-  if (openJob) {
-    state.selectedJobId = openJob.dataset.openJob;
-    state.activeView = "dashboard";
+  const cleanerJob = event.target.closest("[data-cleaner-job]");
+  if (cleanerJob) {
+    state.cleanerSelectedJobId = cleanerJob.dataset.cleanerJob;
+    saveState();
+    render();
+    return;
+  }
+
+  const openCleanerJob = event.target.closest("[data-open-cleaner-job]");
+  if (openCleanerJob) {
+    state.activeCleanerId = openCleanerJob.dataset.cleaner;
+    state.cleanerSelectedJobId = openCleanerJob.dataset.openCleanerJob;
+    state.activeView = "cleaner";
     saveState();
     render();
     return;
@@ -1119,22 +972,6 @@ function handleClick(event) {
     saveState();
     render();
     toast(`${job.unit} moved to ${formatStatus(job.status)}`);
-    return;
-  }
-
-  const linenButton = event.target.closest("[data-linen]");
-  if (linenButton) {
-    const job = findJob(linenButton.dataset.job);
-    job.linen = linenButton.dataset.linen;
-    if (job.linen === "delivered") {
-      job.blockers = job.blockers.filter(
-        (blocker) => !blocker.toLowerCase().includes("sheet")
-      );
-    }
-    job.updated = "just now";
-    syncJobStatus(job);
-    saveState();
-    render();
     return;
   }
 
@@ -1152,14 +989,39 @@ function handleClick(event) {
     return;
   }
 
+  const finishCleaner = event.target.closest("[data-finish-cleaner]");
+  if (finishCleaner) {
+    const job = findJob(finishCleaner.dataset.finishCleaner);
+    job.status = canMarkReady(job) ? "ready" : "inspection";
+    job.updated = "just now";
+    saveState();
+    render();
+    toast(`${job.unit} sent to ${formatStatus(job.status)}`);
+    return;
+  }
+
   const resolveIssue = event.target.closest("[data-resolve-issue]");
   if (resolveIssue) {
     const job = findJob(resolveIssue.dataset.job);
     const issue = job.issues.find((item) => item.id === resolveIssue.dataset.resolveIssue);
     if (issue) issue.status = "resolved";
-    job.blockers = [];
-    job.updated = "just now";
+    if (!hasBlockingIssue(job) && job.linen !== "needed") {
+      job.blockers = [];
+    } else {
+      job.blockers = job.blockers.filter((blocker) => blocker !== issue?.title);
+    }
     syncJobStatus(job);
+    job.updated = "just now";
+    saveState();
+    render();
+    return;
+  }
+
+  const removeAdded = event.target.closest("[data-remove-added]");
+  if (removeAdded) {
+    const job = findJob(removeAdded.dataset.job);
+    job.addedItems = job.addedItems.filter((entry) => entry.id !== removeAdded.dataset.removeAdded);
+    job.updated = "just now";
     saveState();
     render();
     return;
@@ -1186,21 +1048,15 @@ function handleClick(event) {
   }
 
   if (event.target.closest("#quickIssue")) {
-    state.activeView = "dashboard";
-    const job = getSelectedJob() || state.jobs[0];
-    state.selectedJobId = job.id;
+    state.activeView = "manager";
     saveState();
     render();
-    const input = document.querySelector("[data-issue-form] input[name='title']");
-    input?.focus();
+    document.querySelector("[data-issue-form] input[name='title']")?.focus();
     return;
   }
 
   if (event.target.closest("[data-simulate-restock]")) {
-    state.inventory = state.inventory.map((item) => ({
-      ...item,
-      onHand: Math.max(item.onHand, item.par),
-    }));
+    state.inventory = state.inventory.map((item) => ({ ...item, onHand: Math.max(item.onHand, item.par) }));
     saveState();
     render();
     toast("Stock received to par levels");
@@ -1219,8 +1075,7 @@ function handleClick(event) {
   }
 
   if (event.target.closest("[data-connect-guesty]")) {
-    const hasGuesty = state.calendarSources.some((source) => source.id === "guesty-main");
-    if (!hasGuesty) {
+    if (!state.calendarSources.some((source) => source.id === "guesty-main")) {
       state.calendarSources.unshift({
         id: "guesty-main",
         name: "Guesty PMS",
@@ -1233,7 +1088,6 @@ function handleClick(event) {
         conflicts: 0,
       });
     }
-    state.activeView = "sync";
     saveState();
     render();
     toast("PMS connection staged");
@@ -1252,9 +1106,7 @@ function handleClick(event) {
 
   const removeSource = event.target.closest("[data-remove-source]");
   if (removeSource) {
-    state.calendarSources = state.calendarSources.filter(
-      (source) => source.id !== removeSource.dataset.removeSource
-    );
+    state.calendarSources = state.calendarSources.filter((source) => source.id !== removeSource.dataset.removeSource);
     saveState();
     render();
   }
@@ -1276,11 +1128,7 @@ function handleChange(event) {
   if (restock) {
     const job = findJob(restock.dataset.job);
     toggleListValue(job.restockDone, restock.dataset.restock, restock.checked);
-    if (job.restockNeeded.every((item) => job.restockDone.includes(item))) {
-      toggleListValue(job.completed, "restock", true);
-    } else {
-      toggleListValue(job.completed, "restock", false);
-    }
+    syncRestockChecklist(job);
     job.updated = "just now";
     syncJobStatus(job);
     saveState();
@@ -1298,15 +1146,26 @@ function handleChange(event) {
     return;
   }
 
-  if (event.target.id === "filterCleaner") {
-    state.filters.cleaner = event.target.value;
+  const linenSelect = event.target.closest("[data-linen-select]");
+  if (linenSelect) {
+    const job = findJob(linenSelect.dataset.linenSelect);
+    job.linen = linenSelect.value;
+    if (job.linen === "delivered") {
+      job.blockers = job.blockers.filter((blocker) => !blocker.toLowerCase().includes("sheet"));
+    }
+    job.updated = "just now";
+    syncJobStatus(job);
     saveState();
     render();
     return;
   }
 
-  if (event.target.id === "filterRisk") {
-    state.filters.risk = event.target.value;
+  if (event.target.id === "activeCleaner") {
+    state.activeCleanerId = event.target.value;
+    state.cleanerSelectedJobId =
+      state.jobs.find((job) => job.cleanerId === state.activeCleanerId && job.status !== "ready")?.id ||
+      state.jobs.find((job) => job.cleanerId === state.activeCleanerId)?.id ||
+      "";
     saveState();
     render();
   }
@@ -1324,6 +1183,12 @@ function handleSubmit(event) {
   const issueForm = event.target.closest("[data-issue-form]");
   if (issueForm) {
     submitIssue(event);
+    return;
+  }
+
+  const addItemForm = event.target.closest("[data-add-item-form]");
+  if (addItemForm) {
+    submitAddedItem(event);
     return;
   }
 
@@ -1359,6 +1224,40 @@ function submitIssue(event) {
   toast(`${job.unit} issue added`);
 }
 
+function submitAddedItem(event) {
+  event.preventDefault();
+  const form = event.target;
+  const job = findJob(form.dataset.addItemForm);
+  const data = new FormData(form);
+  const item = getInventoryItem(String(data.get("itemId")));
+  const qty = Math.max(Number(data.get("qty")) || 1, 1);
+  const area = String(data.get("area") || "Unit");
+  const note = String(data.get("note") || "").trim();
+  if (!item) return;
+
+  job.addedItems.unshift({
+    id: `add-${Date.now()}`,
+    itemId: item.id,
+    itemName: item.item,
+    qty,
+    unit: item.unit,
+    area,
+    note,
+    by: getCleaner(job.cleanerId).name,
+    time: "just now",
+  });
+  item.onHand = Math.max(item.onHand - qty, 0);
+  if (job.restockNeeded.includes(item.id)) {
+    toggleListValue(job.restockDone, item.id, true);
+    syncRestockChecklist(job);
+  }
+  if (job.status === "assigned") job.status = "in-progress";
+  job.updated = "just now";
+  saveState();
+  render();
+  toast(`${item.item} logged for ${job.unit}`);
+}
+
 function submitIcal(event) {
   event.preventDefault();
   const form = event.target;
@@ -1366,8 +1265,8 @@ function submitIcal(event) {
   const name = String(data.get("name") || "").trim();
   const url = String(data.get("url") || "").trim();
   const type = String(data.get("type") || "Other iCal");
-
   if (!name || !url) return;
+
   state.calendarSources.unshift({
     id: `ical-${Date.now()}`,
     name,
@@ -1384,24 +1283,12 @@ function submitIcal(event) {
   toast(`${name} added`);
 }
 
-function getFilteredJobs() {
-  const query = state.filters.search.trim().toLowerCase();
-  return state.jobs.filter((job) => {
-    const matchesQuery =
-      !query ||
-      [job.unit, job.property, job.area, job.guest, getCleaner(job.cleanerId).name]
-        .join(" ")
-        .toLowerCase()
-        .includes(query);
-    const matchesCleaner =
-      state.filters.cleaner === "all" || state.filters.cleaner === job.cleanerId;
-    const matchesRisk =
-      state.filters.risk === "all" ||
-      (state.filters.risk === "blocked" && job.status === "blocked") ||
-      (state.filters.risk === "same-day" && job.priority === "same-day") ||
-      (state.filters.risk === "ready" && job.status === "ready");
-    return matchesQuery && matchesCleaner && matchesRisk;
-  });
+function getManagerJobs() {
+  const sorted = [...state.jobs].sort((a, b) => timeToMinutes(a.checkin) - timeToMinutes(b.checkin));
+  if (state.managerFilter === "all") return sorted;
+  if (state.managerFilter === "same-day") return sorted.filter((job) => job.priority === "same-day");
+  if (state.managerFilter === "ready") return sorted.filter((job) => job.status === "ready");
+  return sorted.filter((job) => job.status === "blocked" || openIssues(job).length || job.priority === "same-day" || job.status === "inspection");
 }
 
 function getSelectedJob() {
@@ -1420,16 +1307,36 @@ function getCleaner(id) {
   return cleaners.find((cleaner) => cleaner.id === id) || cleaners[0];
 }
 
+function getInventoryItem(id) {
+  return state.inventory.find((item) => item.id === id);
+}
+
 function getProgress(job) {
   return Math.round((job.completed.length / checklistTemplate.length) * 100);
+}
+
+function countReady() {
+  return state.jobs.filter((job) => job.status === "ready").length;
+}
+
+function countBlocked() {
+  return state.jobs.filter((job) => job.status === "blocked").length;
 }
 
 function countSameDay() {
   return state.jobs.filter((job) => job.priority === "same-day").length;
 }
 
-function countBlocked() {
-  return state.jobs.filter((job) => job.status === "blocked").length;
+function countOpenIssues() {
+  return state.jobs.reduce((sum, job) => sum + openIssues(job).length, 0);
+}
+
+function countAddedItems() {
+  return state.jobs.reduce((sum, job) => sum + job.addedItems.length, 0);
+}
+
+function countLowStock() {
+  return state.inventory.filter((item) => inventoryRisk(item) === "low").length;
 }
 
 function openIssues(job) {
@@ -1459,6 +1366,11 @@ function syncJobStatus(job) {
   } else if (job.status === "blocked" && !hasBlockingIssue(job)) {
     job.status = job.completed.length ? "in-progress" : "assigned";
   }
+}
+
+function syncRestockChecklist(job) {
+  const restockDone = job.restockNeeded.length > 0 && job.restockNeeded.every((item) => job.restockDone.includes(item));
+  toggleListValue(job.completed, "restock", restockDone);
 }
 
 function inventoryRisk(item) {
@@ -1515,8 +1427,7 @@ function escapeHtml(value) {
 }
 
 function toast(message) {
-  const previous = document.querySelector(".toast");
-  previous?.remove();
+  document.querySelector(".toast")?.remove();
   const node = document.createElement("div");
   node.className = "toast";
   node.textContent = message;
