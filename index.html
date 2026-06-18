@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TurnReady Ops</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar" aria-label="Primary navigation">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">TR</span>
+          <div>
+            <strong>TurnReady</strong>
+            <span>Ops desk</span>
+          </div>
+        </div>
+
+        <nav class="nav-list">
+          <button class="nav-item is-active" data-view="dashboard" type="button">
+            <span class="nav-symbol" aria-hidden="true"></span>
+            Dashboard
+          </button>
+          <button class="nav-item" data-view="inventory" type="button">
+            <span class="nav-symbol" aria-hidden="true"></span>
+            Inventory
+          </button>
+          <button class="nav-item" data-view="sync" type="button">
+            <span class="nav-symbol" aria-hidden="true"></span>
+            Sync
+          </button>
+          <button class="nav-item" data-view="team" type="button">
+            <span class="nav-symbol" aria-hidden="true"></span>
+            Team
+          </button>
+          <button class="nav-item" data-view="templates" type="button">
+            <span class="nav-symbol" aria-hidden="true"></span>
+            Templates
+          </button>
+        </nav>
+
+        <section class="sidebar-card">
+          <span class="eyebrow">Next check-in</span>
+          <strong id="nextCheckin">--</strong>
+          <small id="nextCheckinMeta">No unit selected</small>
+        </section>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar">
+          <div>
+            <span class="eyebrow">Thursday, Jun 18</span>
+            <h1 id="viewTitle">Readiness Dashboard</h1>
+          </div>
+          <div class="topbar-actions">
+            <button class="button ghost" id="resetDemo" type="button">Reset demo</button>
+            <button class="button primary" id="quickIssue" type="button">New issue</button>
+          </div>
+        </header>
+
+        <section id="appView" class="view" aria-live="polite"></section>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
