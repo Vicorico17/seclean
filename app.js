@@ -155,6 +155,11 @@ function renderOnboarding() {
           </div>
         </div>
         ${renderOnboardingStep(step)}
+        <div class="onboarding-skip">
+          <button class="button ghost" data-skip-onboarding type="button">
+            Skip onboarding and load mock data
+          </button>
+        </div>
       </div>
     </section>
   `;
@@ -556,6 +561,14 @@ function handleClick(event) {
     state = structuredClone(defaultState);
     saveState();
     render();
+    return;
+  }
+
+  if (event.target.closest("[data-skip-onboarding]")) {
+    state = createMockState();
+    saveState();
+    render();
+    toast("Mock workspace loaded");
   }
 }
 
@@ -685,6 +698,89 @@ function handleOnboardingSubmit(form) {
 
   saveState();
   render();
+}
+
+function createMockState() {
+  return normalizeState({
+    activeView: "manager",
+    selectedPropertyId: "mercer-4b",
+    selectedCleanerJobId: "mercer-4b",
+    activeCleanerId: "maya",
+    account: {
+      created: true,
+      company: "Demo Stay Co.",
+      managerName: "Alex Morgan",
+      managerEmail: "manager@example.com",
+    },
+    onboarding: {
+      completed: true,
+      step: onboardingSteps.length - 1,
+      bookingSource: {
+        type: "Guesty PMS",
+        source: "Demo Guesty workspace",
+      },
+      checklist: defaultChecklist,
+    },
+    properties: [
+      { id: "mercer-4b", name: "Mercer Loft 4B", address: "Mercer House, SoHo", bedrooms: "2 bed / 1 bath" },
+      { id: "harbor-12a", name: "Harbor Suite 12A", address: "Harborline, Waterfront", bedrooms: "1 bed / 1 bath" },
+      { id: "atlas-2c", name: "Atlas Studio 2C", address: "Atlas Court, Midtown", bedrooms: "Studio / 1 bath" },
+      { id: "pier-3", name: "Pier Cottage 3", address: "Pier Cottages, Waterfront", bedrooms: "2 bed / 2 bath" },
+    ],
+    team: [
+      { id: "maya", name: "Maya Chen", email: "maya@example.com", role: "Cleaner", propertyIds: ["mercer-4b"] },
+      { id: "jon", name: "Jon Bell", email: "jon@example.com", role: "Cleaner", propertyIds: ["harbor-12a", "pier-3"] },
+      { id: "marco", name: "Marco Diaz", email: "marco@example.com", role: "Cleaner", propertyIds: ["atlas-2c"] },
+    ],
+    bookings: [
+      { id: "b1", propertyId: "pier-3", guest: "Sam Okafor", channel: "Airbnb", start: "Jun 18", end: "Jun 20", checkin: "13:30", checkout: "08:45" },
+      { id: "b2", propertyId: "atlas-2c", guest: "Mina Torres", channel: "Direct", start: "Jun 18", end: "Jun 19", checkin: "14:30", checkout: "09:30" },
+      { id: "b3", propertyId: "mercer-4b", guest: "Eli Park", channel: "Airbnb", start: "Jun 18", end: "Jun 21", checkin: "15:00", checkout: "10:00" },
+      { id: "b4", propertyId: "harbor-12a", guest: "Nora Singh", channel: "Booking.com", start: "Jun 19", end: "Jun 22", checkin: "16:00", checkout: "11:00" },
+    ],
+    cleaningJobs: [
+      {
+        id: "mercer-4b",
+        propertyId: "mercer-4b",
+        cleanerId: "maya",
+        status: "not-ready",
+        due: "Jun 18, 15:00",
+        cleaned: false,
+        checklist: ["sheets", "towels", "toilet-paper", "hand-soap", "coffee"],
+        completedItems: ["sheets", "towels"],
+      },
+      {
+        id: "harbor-12a",
+        propertyId: "harbor-12a",
+        cleanerId: "jon",
+        status: "not-ready",
+        due: "Jun 19, 16:00",
+        cleaned: false,
+        checklist: ["sheets", "towels", "toilet-paper", "hand-soap"],
+        completedItems: [],
+      },
+      {
+        id: "atlas-2c",
+        propertyId: "atlas-2c",
+        cleanerId: "marco",
+        status: "ready",
+        due: "Jun 18, 14:30",
+        cleaned: true,
+        checklist: ["sheets", "towels", "toilet-paper", "coffee"],
+        completedItems: ["sheets", "towels", "toilet-paper", "coffee"],
+      },
+      {
+        id: "pier-3",
+        propertyId: "pier-3",
+        cleanerId: "jon",
+        status: "ready",
+        due: "Jun 18, 13:30",
+        cleaned: true,
+        checklist: ["sheets", "towels", "toilet-paper", "hand-soap"],
+        completedItems: ["sheets", "towels", "toilet-paper", "hand-soap"],
+      },
+    ],
+  });
 }
 
 function getCalendarDays() {

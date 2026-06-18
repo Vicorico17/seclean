@@ -15,4 +15,4 @@ A static MVP for property managers and cleaning teams who need a simple way to t
 
 Open `index.html` in a browser.
 
-The demo stores changes in `localStorage`. Use **Reset demo** in the app to restart onboarding.
+The demo stores changes in `localStorage`. Use **Reset demo** in the app to restart onboarding, or use **Skip onboarding and load mock data** to jump straight into a populated demo workspace.

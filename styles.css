@@ -309,6 +309,13 @@ h2 {
   font-size: 18px;
 }
 
+.onboarding-skip {
+  display: flex;
+  justify-content: center;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
 .progress-track {
   height: 8px;
   overflow: hidden;
