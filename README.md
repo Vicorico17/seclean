@@ -1,14 +1,14 @@
 # TurnReady Ops
 
-A static MVP for property managers and cleaning teams who need one place to manage turnovers, linen, restock, issues, and booking-source sync.
+A static MVP for property managers and cleaning teams who need a simple way to track properties, bookings, cleaning readiness, and team access.
 
 ## What it covers
 
-- Manager dashboard for readiness, blockers, same-day turns, issues, and cleaner activity
-- Cleaner portal for assigned jobs, checklist completion, and logging items added to each unit
-- Linen delivery, restock, issue reporting, and checklist completion
-- Inventory position for sheets, towels, and consumables
-- Booking sync concept for Guesty/PMS connections and iCal feeds from Airbnb, Booking.com, Vrbo, or other sources
+- Property manager account setup as the first step
+- Manager dashboard with all properties, booking calendar, and ready/not-ready status
+- Team access so managers can add cleaners and assign property access
+- Cleaner dashboard with only the properties assigned to that cleaner
+- Cleaner checklist for required items before marking an apartment turn-ready
 
 ## Run locally
 
