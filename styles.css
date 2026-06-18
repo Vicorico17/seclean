@@ -244,7 +244,8 @@ h2 {
 }
 
 .panel,
-.account-screen {
+.onboarding-shell,
+.onboarding-card {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--paper);
@@ -270,38 +271,98 @@ h2 {
   gap: 14px;
 }
 
-.account-screen {
+.onboarding-shell {
   display: grid;
-  grid-template-columns: minmax(0, 0.95fr) minmax(320px, 0.75fr);
-  gap: 26px;
+  grid-template-columns: 280px minmax(320px, 620px);
+  gap: 18px;
   align-items: start;
-  max-width: 980px;
+  max-width: 960px;
   padding: 24px;
 }
 
-.account-copy {
+.onboarding-steps {
   display: grid;
-  gap: 12px;
+  gap: 18px;
 }
 
-.account-copy p {
-  max-width: 560px;
+.step-list {
+  display: grid;
+  gap: 8px;
+}
+
+.step-item {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  min-height: 42px;
+  padding: 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  color: var(--muted);
+}
+
+.step-item span {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: #edf0ed;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.step-item.is-active {
+  border-color: #cdd8d2;
+  background: #f0f7f4;
+  color: var(--teal-dark);
+}
+
+.step-item.is-active span,
+.step-item.is-done span {
+  background: var(--teal);
+  color: white;
+}
+
+.onboarding-card {
+  padding: 18px;
+  box-shadow: none;
+}
+
+.onboarding-form {
+  display: grid;
+  gap: 13px;
+}
+
+.onboarding-form p {
   color: var(--muted);
   line-height: 1.55;
 }
 
-.account-form,
 .invite-form {
   display: grid;
   gap: 10px;
 }
 
-.account-form label {
+.onboarding-form label {
   display: grid;
   gap: 6px;
   color: var(--muted);
   font-size: 13px;
   font-weight: 800;
+}
+
+.onboarding-checklist {
+  display: grid;
+  gap: 8px;
+}
+
+.two-field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
 }
 
 .dashboard-grid {
@@ -325,6 +386,12 @@ h2 {
   height: 150px;
   border-radius: var(--radius);
   object-fit: cover;
+}
+
+.hero-panel small {
+  display: block;
+  margin-top: 8px;
+  color: var(--muted);
 }
 
 .property-list,
@@ -520,6 +587,11 @@ h2 {
   background: #f0fbf3;
 }
 
+.check-item.is-flat {
+  border-bottom: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
 .check-item input {
   width: 18px;
   height: 18px;
@@ -533,6 +605,10 @@ h2 {
   padding: 20px;
   color: var(--muted);
   text-align: center;
+}
+
+.empty-state.small {
+  min-height: 70px;
 }
 
 .toast {
@@ -553,7 +629,7 @@ h2 {
 @media (max-width: 1150px) {
   .dashboard-grid,
   .cleaner-layout,
-  .account-screen {
+  .onboarding-shell {
     grid-template-columns: 1fr;
   }
 
@@ -632,7 +708,8 @@ h2 {
   }
 
   .invite-form,
-  .detail-grid {
+  .detail-grid,
+  .two-field-grid {
     grid-template-columns: 1fr;
   }
 
