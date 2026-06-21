@@ -308,16 +308,51 @@ function renderChecklistStep() {
 function renderManagerDashboard() {
   return `
     <div class="manager-dashboard">
-      <div class="manager-section-nav" aria-label="Manager dashboard sections">
-        ${Object.entries(managerSections).map(([id, section]) => `
-          <button class="manager-section-button ${state.managerSection === id ? "is-active" : ""}" data-manager-section="${id}" type="button" aria-pressed="${state.managerSection === id}">
-            ${renderIcon(section.icon)}
-            <span>${section.label}</span>
-          </button>
-        `).join("")}
+      <aside class="dashboard-sidebar">
+        <div class="sidebar-kicker">Workspace</div>
+        <strong>${escapeHtml(state.account.company || "TurnReady")}</strong>
+        <span>${state.properties.length} properties managed</span>
+        <div class="manager-section-nav" aria-label="Manager dashboard sections">
+          ${Object.entries(managerSections).map(([id, section]) => `
+            <button class="manager-section-button ${state.managerSection === id ? "is-active" : ""}" data-manager-section="${id}" type="button" aria-pressed="${state.managerSection === id}">
+              ${renderIcon(section.icon)}
+              <span>${section.label}</span>
+            </button>
+          `).join("")}
+        </div>
+      </aside>
+      <div class="dashboard-content">
+        ${renderDashboardSummary()}
+        ${renderManagerSection()}
       </div>
-      ${renderManagerSection()}
     </div>
+  `;
+}
+
+function renderDashboardSummary() {
+  const ready = state.cleaningJobs.filter((job) => job.status === "ready").length;
+  const pending = state.cleaningJobs.filter((job) => job.status !== "ready").length;
+  const assigned = state.cleaningJobs.filter((job) => Boolean(job.cleanerId)).length;
+  const stats = [
+    { label: "Properties", value: state.properties.length, tone: "neutral" },
+    { label: "Upcoming bookings", value: state.bookings.length, tone: "accent" },
+    { label: "Turn-ready", value: ready, tone: "success" },
+    { label: "Needs cleaning", value: pending, tone: "danger" },
+  ];
+
+  return `
+    <section class="dashboard-summary" aria-label="Workspace summary">
+      ${stats.map((stat) => `
+        <div class="summary-card ${stat.tone}">
+          <span>${stat.label}</span>
+          <strong>${stat.value}</strong>
+        </div>
+      `).join("")}
+      <div class="summary-card assigned">
+        <span>Assigned jobs</span>
+        <strong>${assigned}/${state.cleaningJobs.length || 0}</strong>
+      </div>
+    </section>
   `;
 }
 
@@ -339,6 +374,14 @@ function renderPropertiesPanel() {
       </div>
       ${state.showAddPropertyForm ? renderAddPropertyForm() : ""}
       <div class="property-list">
+        ${state.properties.length ? `
+          <div class="property-list-head" aria-hidden="true">
+            <span>Property</span>
+            <span>Next guest</span>
+            <span>Cleaner</span>
+            <span>Status</span>
+          </div>
+        ` : ""}
         ${state.properties.length ? state.properties.map(renderPropertyRow).join("") : `<div class="empty-state">No properties yet.</div>`}
       </div>
     </section>
