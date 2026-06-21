@@ -1,7 +1,7 @@
 :root {
   color-scheme: light;
-  --blue: #0044ff;
-  --blue-soft: #f6f9ff;
+  --green: #12805c;
+  --green-soft: #eefaf5;
   --ink: #000000;
   --muted: rgba(0, 0, 0, 0.7);
   --subtle: rgba(0, 0, 0, 0.55);
@@ -85,7 +85,7 @@ p {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: var(--blue);
+  color: var(--green);
   font-size: 22px;
   font-weight: 700;
   line-height: 1;
@@ -101,7 +101,7 @@ p {
 .logo-icon::after {
   content: "";
   position: absolute;
-  border: 3px solid var(--blue);
+  border: 3px solid var(--green);
   border-radius: 999px;
 }
 
@@ -125,7 +125,7 @@ p {
   right: 5px;
   top: 12px;
   height: 3px;
-  background: var(--blue);
+  background: var(--green);
 }
 
 .nav {
@@ -165,13 +165,13 @@ p {
 
 .nav-button:hover,
 .nav-button.is-active {
-  background: var(--blue-soft);
+  background: var(--green-soft);
   color: var(--ink);
   font-weight: 600;
 }
 
 .nav-button.is-active svg {
-  color: var(--blue);
+  color: var(--green);
 }
 
 .profile {
@@ -190,8 +190,8 @@ p {
   flex: 0 0 auto;
   border-radius: 999px;
   border: 1px solid rgba(0, 0, 0, 0.15);
-  background: var(--blue-soft);
-  color: var(--blue);
+  background: var(--green-soft);
+  color: var(--green);
   font-weight: 700;
 }
 
@@ -311,8 +311,8 @@ p {
   height: 52px;
   border: 0;
   border-radius: var(--radius);
-  background: var(--blue-soft);
-  color: var(--blue);
+  background: var(--green-soft);
+  color: var(--green);
 }
 
 .badge {
@@ -501,15 +501,15 @@ p {
 }
 
 .primary-button {
-  border: 1px solid var(--blue);
-  background: var(--blue);
+  border: 1px solid var(--green);
+  background: var(--green);
   color: #fff;
 }
 
 .outline-button {
-  border: 1px dashed var(--blue);
+  border: 1px dashed var(--green);
   background: #fff;
-  color: var(--blue);
+  color: var(--green);
 }
 
 .text-button {
@@ -597,9 +597,9 @@ p {
   display: inline-flex;
   align-items: center;
   min-height: 20px;
-  border: 1px solid rgba(0, 68, 255, 0.3);
+  border: 1px solid rgba(18, 128, 92, 0.3);
   border-radius: 6px;
-  color: var(--blue);
+  color: var(--green);
   padding: 3px 10px;
   font-size: 12px;
   font-weight: 500;
@@ -646,8 +646,8 @@ p {
   width: 80px;
   height: 80px;
   border-radius: 999px;
-  background: var(--blue-soft);
-  color: var(--blue);
+  background: var(--green-soft);
+  color: var(--green);
 }
 
 .feature-bottom {
@@ -710,8 +710,8 @@ p {
 }
 
 .segmented button.is-active {
-  background: var(--blue-soft);
-  color: var(--blue);
+  background: var(--green-soft);
+  color: var(--green);
   font-weight: 600;
 }
 
@@ -855,7 +855,7 @@ p {
 
 .month-grid button.is-active,
 .month-grid button:hover {
-  background: var(--blue);
+  background: var(--green);
   color: #fff;
 }
 
@@ -878,7 +878,7 @@ p {
 }
 
 .booking-time {
-  color: var(--blue);
+  color: var(--green);
   font-weight: 700;
 }
 
@@ -925,7 +925,7 @@ p {
   flex: 1;
   min-width: 18px;
   border-radius: 8px 8px 0 0;
-  background: var(--blue);
+  background: var(--green);
   opacity: var(--alpha, 1);
   height: var(--height);
 }
@@ -996,9 +996,9 @@ p {
   display: grid;
   place-items: center;
   min-height: 220px;
-  border: 1px dashed var(--blue);
+  border: 1px dashed var(--green);
   border-radius: 12px;
-  color: var(--blue);
+  color: var(--green);
   text-align: center;
 }
 

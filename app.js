@@ -117,7 +117,7 @@ function renderSidebar() {
     <aside class="sidebar" aria-label="Primary navigation">
       <div class="logo">
         <div class="logo-mark">
-          <span>RentReady</span>
+          <span>Rent Ready</span>
           <span class="logo-icon" aria-hidden="true"><span class="logo-line"></span></span>
         </div>
       </div>
