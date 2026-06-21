@@ -91,43 +91,6 @@ p {
   line-height: 1;
 }
 
-.logo-icon {
-  position: relative;
-  width: 31px;
-  height: 24px;
-}
-
-.logo-icon::before,
-.logo-icon::after {
-  content: "";
-  position: absolute;
-  border: 3px solid var(--green);
-  border-radius: 999px;
-}
-
-.logo-icon::before {
-  left: 0;
-  top: 1px;
-  width: 18px;
-  height: 18px;
-}
-
-.logo-icon::after {
-  right: 0;
-  top: 7px;
-  width: 9px;
-  height: 9px;
-}
-
-.logo-line {
-  position: absolute;
-  left: 14px;
-  right: 5px;
-  top: 12px;
-  height: 3px;
-  background: var(--green);
-}
-
 .nav {
   display: grid;
   align-content: start;

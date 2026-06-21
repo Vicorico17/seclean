@@ -118,7 +118,6 @@ function renderSidebar() {
       <div class="logo">
         <div class="logo-mark">
           <span>Rent Ready</span>
-          <span class="logo-icon" aria-hidden="true"><span class="logo-line"></span></span>
         </div>
       </div>
       <nav class="nav">
