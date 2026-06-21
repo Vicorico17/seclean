@@ -11,6 +11,7 @@ const defaultChecklist = ["sheets", "towels", "toilet-paper", "hand-soap", "coff
 
 const defaultState = {
   activeView: "manager",
+  managerSection: "properties",
   selectedPropertyId: "",
   selectedCleanerJobId: "",
   activeCleanerId: "",
@@ -42,6 +43,21 @@ const onboardingSteps = [
 const viewTitles = {
   manager: "Manager Dashboard",
   cleaner: "Cleaner Dashboard",
+};
+
+const managerSections = {
+  properties: {
+    label: "Properties",
+    icon: "properties",
+  },
+  calendar: {
+    label: "Calendar",
+    icon: "calendar",
+  },
+  team: {
+    label: "Team",
+    icon: "team",
+  },
 };
 
 let state = loadState();
@@ -102,6 +118,7 @@ function normalizeState(raw) {
   };
 
   if (!viewTitles[next.activeView]) next.activeView = "manager";
+  if (!managerSections[next.managerSection]) next.managerSection = "properties";
   if (!next.properties.some((property) => property.id === next.selectedPropertyId)) {
     next.selectedPropertyId = next.properties[0]?.id || "";
   }
@@ -287,66 +304,96 @@ function renderChecklistStep() {
 }
 
 function renderManagerDashboard() {
-  const ready = state.cleaningJobs.filter((job) => job.status === "ready").length;
-  const notReady = state.cleaningJobs.length - ready;
+  return `
+    <div class="manager-dashboard">
+      <div class="manager-section-nav" aria-label="Manager dashboard sections">
+        ${Object.entries(managerSections).map(([id, section]) => `
+          <button class="manager-section-button ${state.managerSection === id ? "is-active" : ""}" data-manager-section="${id}" type="button" aria-pressed="${state.managerSection === id}">
+            ${renderIcon(section.icon)}
+            <span>${section.label}</span>
+          </button>
+        `).join("")}
+      </div>
+      ${renderManagerSection()}
+    </div>
+  `;
+}
+
+function renderManagerSection() {
+  if (state.managerSection === "calendar") return renderCalendarPanel();
+  if (state.managerSection === "team") return renderTeamPanel();
+  return renderPropertiesPanel();
+}
+
+function renderPropertiesPanel() {
+  return `
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <span class="eyebrow">Properties</span>
+          <h2>All Properties</h2>
+        </div>
+      </div>
+      <div class="property-list">
+        ${state.properties.length ? state.properties.map(renderPropertyRow).join("") : `<div class="empty-state">No properties yet.</div>`}
+      </div>
+    </section>
+  `;
+}
+
+function renderCalendarPanel() {
+  return `
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <span class="eyebrow">Bookings</span>
+          <h2>Calendar</h2>
+        </div>
+      </div>
+      <div class="calendar-grid">
+        ${getCalendarDays().map(renderCalendarDay).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderTeamPanel() {
+  return `
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <span class="eyebrow">Access</span>
+          <h2>Team Members</h2>
+        </div>
+      </div>
+      <div class="panel-body simple-stack">
+        <form class="invite-form" data-invite-form>
+          <input class="field" name="name" placeholder="Name" required />
+          <input class="field" name="email" type="email" placeholder="Email" required />
+          <select class="select" name="propertyId">
+            ${state.properties.map((property) => `<option value="${escapeAttr(property.id)}">${escapeHtml(property.name)}</option>`).join("")}
+          </select>
+          <button class="button primary" type="submit">Add to team</button>
+        </form>
+        <div class="team-list">
+          ${state.team.length ? state.team.map(renderTeamMember).join("") : `<div class="empty-state small">No team members yet.</div>`}
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function renderIcon(name) {
+  const paths = {
+    properties: '<path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-8h6v8"/><path d="M9 9h.01"/><path d="M15 9h.01"/>',
+    calendar: '<path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/>',
+    team: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  };
 
   return `
-    <div class="dashboard-grid">
-      <section class="panel hero-panel">
-        <div>
-          <span class="eyebrow">${escapeHtml(state.account.company)}</span>
-          <h2>${state.properties.length} properties, ${ready} ready, ${notReady} not ready</h2>
-          <small>${state.onboarding.bookingSource ? `Booking source: ${escapeHtml(state.onboarding.bookingSource.type)}` : "No booking source connected"}</small>
-        </div>
-        <img src="assets/turnover-ready-room.png" alt="Guest-ready bedroom with fresh linens" />
-      </section>
-
-      <section class="panel">
-        <div class="panel-header">
-          <div>
-            <span class="eyebrow">Properties</span>
-            <h2>All Properties</h2>
-          </div>
-        </div>
-        <div class="property-list">
-          ${state.properties.length ? state.properties.map(renderPropertyRow).join("") : `<div class="empty-state">No properties yet.</div>`}
-        </div>
-      </section>
-
-      <section class="panel">
-        <div class="panel-header">
-          <div>
-            <span class="eyebrow">Bookings</span>
-            <h2>Calendar</h2>
-          </div>
-        </div>
-        <div class="calendar-grid">
-          ${getCalendarDays().map(renderCalendarDay).join("")}
-        </div>
-      </section>
-
-      <section class="panel">
-        <div class="panel-header">
-          <div>
-            <span class="eyebrow">Access</span>
-            <h2>Team Members</h2>
-          </div>
-        </div>
-        <div class="panel-body simple-stack">
-          <form class="invite-form" data-invite-form>
-            <input class="field" name="name" placeholder="Name" required />
-            <input class="field" name="email" type="email" placeholder="Email" required />
-            <select class="select" name="propertyId">
-              ${state.properties.map((property) => `<option value="${property.id}">${property.name}</option>`).join("")}
-            </select>
-            <button class="button primary" type="submit">Add to team</button>
-          </form>
-          <div class="team-list">
-            ${state.team.length ? state.team.map(renderTeamMember).join("") : `<div class="empty-state small">No team members yet.</div>`}
-          </div>
-        </div>
-      </section>
-    </div>
+    <svg class="section-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      ${paths[name] || paths.properties}
+    </svg>
   `;
 }
 
@@ -517,6 +564,14 @@ function handleClick(event) {
   const navButton = event.target.closest("[data-view]");
   if (navButton) {
     state.activeView = navButton.dataset.view;
+    saveState();
+    render();
+    return;
+  }
+
+  const managerSection = event.target.closest("[data-manager-section]");
+  if (managerSection) {
+    state.managerSection = managerSection.dataset.managerSection;
     saveState();
     render();
     return;

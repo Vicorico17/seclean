@@ -335,6 +335,51 @@ h2 {
   gap: 10px;
 }
 
+.manager-dashboard {
+  display: grid;
+  gap: 18px;
+}
+
+.manager-section-nav {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.manager-section-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 56px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--muted);
+  font-weight: 800;
+  box-shadow: 0 8px 20px rgba(23, 32, 30, 0.05);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.manager-section-button:hover,
+.manager-section-button.is-active {
+  border-color: #b8d4ce;
+  background: #edf8f6;
+  color: var(--teal-dark);
+}
+
+.section-icon {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: 0 0 auto;
+}
+
 .dashboard-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(340px, 0.78fr);
@@ -723,6 +768,22 @@ h2 {
   .topbar-actions .button,
   .button {
     width: 100%;
+  }
+
+  .manager-dashboard {
+    gap: 14px;
+  }
+
+  .manager-section-nav {
+    gap: 8px;
+  }
+
+  .manager-section-button {
+    flex-direction: column;
+    gap: 5px;
+    min-height: 70px;
+    padding: 8px 6px;
+    font-size: 12px;
   }
 
   .nav-item,
