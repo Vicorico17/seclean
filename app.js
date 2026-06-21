@@ -12,6 +12,7 @@ const defaultChecklist = ["sheets", "towels", "toilet-paper", "hand-soap", "coff
 const defaultState = {
   activeView: "manager",
   managerSection: "properties",
+  showAddPropertyForm: false,
   selectedPropertyId: "",
   selectedCleanerJobId: "",
   activeCleanerId: "",
@@ -119,6 +120,7 @@ function normalizeState(raw) {
 
   if (!viewTitles[next.activeView]) next.activeView = "manager";
   if (!managerSections[next.managerSection]) next.managerSection = "properties";
+  next.showAddPropertyForm = Boolean(next.showAddPropertyForm);
   if (!next.properties.some((property) => property.id === next.selectedPropertyId)) {
     next.selectedPropertyId = next.properties[0]?.id || "";
   }
@@ -333,11 +335,27 @@ function renderPropertiesPanel() {
           <span class="eyebrow">Properties</span>
           <h2>All Properties</h2>
         </div>
+        <button class="button primary" data-add-properties type="button">Add properties</button>
       </div>
+      ${state.showAddPropertyForm ? renderAddPropertyForm() : ""}
       <div class="property-list">
         ${state.properties.length ? state.properties.map(renderPropertyRow).join("") : `<div class="empty-state">No properties yet.</div>`}
       </div>
     </section>
+  `;
+}
+
+function renderAddPropertyForm() {
+  return `
+    <form class="add-property-form" data-add-property-form>
+      <input class="field" name="name" placeholder="Property name" required />
+      <input class="field" name="address" placeholder="Address or area" required />
+      <input class="field" name="bedrooms" placeholder="Bedrooms / bathrooms" required />
+      <div class="form-actions">
+        <button class="button ghost" data-cancel-add-property type="button">Cancel</button>
+        <button class="button primary" type="submit">Save property</button>
+      </div>
+    </form>
   `;
 }
 
@@ -572,6 +590,21 @@ function handleClick(event) {
   const managerSection = event.target.closest("[data-manager-section]");
   if (managerSection) {
     state.managerSection = managerSection.dataset.managerSection;
+    state.showAddPropertyForm = false;
+    saveState();
+    render();
+    return;
+  }
+
+  if (event.target.closest("[data-add-properties]")) {
+    state.showAddPropertyForm = true;
+    saveState();
+    render();
+    return;
+  }
+
+  if (event.target.closest("[data-cancel-add-property]")) {
+    state.showAddPropertyForm = false;
     saveState();
     render();
     return;
@@ -654,6 +687,40 @@ function handleSubmit(event) {
   if (onboardingForm) {
     event.preventDefault();
     handleOnboardingSubmit(onboardingForm);
+    return;
+  }
+
+  const addPropertyForm = event.target.closest("[data-add-property-form]");
+  if (addPropertyForm) {
+    event.preventDefault();
+    const data = new FormData(addPropertyForm);
+    const name = String(data.get("name")).trim();
+    const address = String(data.get("address")).trim();
+    const bedrooms = String(data.get("bedrooms")).trim();
+    if (!name || !address || !bedrooms) return;
+
+    const property = {
+      id: createUniquePropertyId(name),
+      name,
+      address,
+      bedrooms,
+    };
+    state.properties.push(property);
+    state.cleaningJobs.push({
+      id: `job-${property.id}`,
+      propertyId: property.id,
+      cleanerId: "",
+      status: "not-ready",
+      due: "No booking",
+      cleaned: false,
+      checklist: state.onboarding.checklist || defaultChecklist,
+      completedItems: [],
+    });
+    state.selectedPropertyId = property.id;
+    state.showAddPropertyForm = false;
+    saveState();
+    render();
+    toast(`${name} added`);
     return;
   }
 
@@ -876,6 +943,17 @@ function slugify(value) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
   return slug || `property-${Date.now()}`;
+}
+
+function createUniquePropertyId(name) {
+  const base = slugify(name);
+  let id = base;
+  let count = 2;
+  while (state.properties.some((property) => property.id === id)) {
+    id = `${base}-${count}`;
+    count += 1;
+  }
+  return id;
 }
 
 function escapeAttr(value) {

@@ -283,6 +283,21 @@ h2 {
   gap: 10px;
 }
 
+.add-property-form {
+  display: grid;
+  grid-template-columns: minmax(160px, 1fr) minmax(180px, 1fr) minmax(150px, 0.8fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.form-actions {
+  display: flex;
+  gap: 8px;
+}
+
 .onboarding-form label {
   display: grid;
   gap: 6px;
@@ -667,8 +682,17 @@ h2 {
     grid-template-columns: 1fr 1fr;
   }
 
-  .invite-form .button {
+  .add-property-form {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .invite-form .button,
+  .add-property-form .form-actions {
     grid-column: 1 / -1;
+  }
+
+  .form-actions {
+    justify-content: end;
   }
 }
 
@@ -752,6 +776,18 @@ h2 {
 
   .invite-form {
     grid-template-columns: 1fr;
+  }
+
+  .add-property-form {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    justify-content: stretch;
+  }
+
+  .form-actions .button {
+    flex: 1;
   }
 }
 
