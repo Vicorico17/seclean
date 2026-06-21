@@ -1,1024 +1,558 @@
-const inventoryItems = [
-  { id: "sheets", label: "Fresh sheets" },
-  { id: "towels", label: "Clean towels" },
-  { id: "toilet-paper", label: "Toilet paper" },
-  { id: "hand-soap", label: "Hand soap" },
-  { id: "coffee", label: "Coffee / tea" },
-  { id: "trash-bags", label: "Trash bags" },
+const app = document.querySelector("#app");
+
+const state = {
+  active: "dashboard",
+  dropdown: null,
+};
+
+const navItems = [
+  { id: "dashboard", label: "Dashboard", icon: "home" },
+  { id: "portfolio", label: "Portfolio", icon: "building" },
+  { id: "calendar", label: "Calendar", icon: "calendar" },
+  { id: "reports", label: "Reports", icon: "report" },
+  { id: "bookings", label: "Bookings", icon: "clock" },
+  { id: "invoices", label: "Invoices", icon: "file" },
+  { id: "einvoice", label: "e-Invoice", icon: "send" },
+  { id: "unique", label: "Unique declaration", icon: "archive" },
+  { id: "cleaning", label: "Cleaning", icon: "sparkle" },
+  { id: "maintenance", label: "Maintenance", icon: "wrench" },
 ];
 
-const defaultChecklist = ["sheets", "towels", "toilet-paper", "hand-soap", "coffee"];
-
-const defaultState = {
-  activeView: "manager",
-  managerSection: "properties",
-  showAddPropertyForm: false,
-  selectedPropertyId: "",
-  selectedCleanerJobId: "",
-  activeCleanerId: "",
-  account: {
-    created: false,
-    company: "",
-    managerName: "",
-    managerEmail: "",
-  },
-  onboarding: {
-    completed: false,
-    step: 0,
-    bookingSource: null,
-    checklist: defaultChecklist,
-  },
-  properties: [],
-  team: [],
-  bookings: [],
-  cleaningJobs: [],
-};
-
-const onboardingSteps = [
-  "Account",
-  "Property",
-  "Bookings",
-  "Checklist",
+const stats = [
+  { value: "&pound;108,000", label: "Total income 2023", trend: "+2.4%", link: "5 uncollected Invoices" },
+  { value: "&pound;21,600", label: "Total expenses 2023", trend: "-1.6%", down: true, link: "2 unrecorded expenses" },
+  { value: "&pound;17,610", label: "Tax calculation 2023", trend: "+2.4%", link: "See all taxes" },
 ];
 
-const viewTitles = {
-  manager: "Manager Dashboard",
-  cleaner: "Cleaner Dashboard",
-};
+const invoices = [
+  { name: "Sophia Mitchell", role: "Client", date: "01 Oct. 2023", amount: "&pound;250", eur: "&euro;292.85", avatar: "sophia" },
+  { name: "Bogdan Popescu", role: "Owner", date: "05 Oct. 2023", amount: "&pound;500", eur: "&euro;585.74", avatar: "bogdan" },
+  { name: "Radu Ionescu", role: "Owner", date: "07 Oct. 2023", amount: "&pound;740", eur: "&euro;866.90", avatar: "radu" },
+  { name: "Mia Bennett", role: "Client", date: "24 Oct. 2023", amount: "&pound;200", eur: "&euro;234.32", avatar: "mia" },
+  { name: "Ana Mihai", role: "Owner", date: "31 Oct. 2023", amount: "&pound;120", eur: "&euro;140.58", avatar: "ana" },
+];
 
-const managerSections = {
-  properties: {
-    label: "Properties",
-    icon: "properties",
-  },
-  calendar: {
-    label: "Calendar",
-    icon: "calendar",
-  },
-  team: {
-    label: "Team",
-    icon: "team",
-  },
-};
+const expenses = [
+  { name: "Credos", date: "05 Oct. 2023", amount: "&pound;120", eur: "&euro;140.58", logo: "CR" },
+  { name: "RCS-RDS", date: "05 Oct. 2023", amount: "&pound;80", eur: "&euro;93.72", logo: "RDS" },
+  { name: "Freshful", date: "05 Oct. 2023", amount: "&pound;95", eur: "&euro;111.29", logo: "FR" },
+  { name: "Eon", date: "05 Oct. 2023", amount: "&pound;30", eur: "&euro;35.14", logo: "EON" },
+  { name: "Cleaning Express", date: "05 Oct. 2023", amount: "&pound;30", eur: "&euro;35.14", logo: "CE" },
+];
 
-let state = loadState();
+const properties = [
+  { name: "27 High Street", location: "London, England", owner: "Cristi Gaidenic", income: "&pound;42,800", expenses: "&pound;8,200", status: "Synced", thumb: "" },
+  { name: "The Glass House", location: "Bristol, England", owner: "Mia Bennett", income: "&pound;31,600", expenses: "&pound;6,900", status: "Review", thumb: "alt" },
+  { name: "Station Road Flat", location: "Manchester, England", owner: "Bogdan Popescu", income: "&pound;18,400", expenses: "&pound;3,100", status: "Synced", thumb: "green" },
+  { name: "Canal View Studio", location: "Birmingham, England", owner: "Ana Mihai", income: "&pound;15,200", expenses: "&pound;2,420", status: "Synced", thumb: "" },
+];
 
-const appView = document.querySelector("#appView");
-const viewTitle = document.querySelector("#viewTitle");
+const bookings = [
+  { time: "09:00", title: "Checkout inspection", place: "27 High Street", guest: "Sophia Mitchell", status: "Ready" },
+  { time: "11:30", title: "Owner handover", place: "The Glass House", guest: "Mia Bennett", status: "Pending" },
+  { time: "14:00", title: "Guest arrival", place: "Station Road Flat", guest: "Radu Ionescu", status: "Ready" },
+  { time: "16:00", title: "Maintenance visit", place: "Canal View Studio", guest: "Cleaning Express", status: "Pending" },
+];
 
-document.addEventListener("click", handleClick);
-document.addEventListener("change", handleChange);
-document.addEventListener("submit", handleSubmit);
+const maintenanceTasks = [
+  { title: "Replace kitchen tap", place: "27 High Street", due: "Today", status: "Pending" },
+  { title: "Boiler pressure check", place: "The Glass House", due: "Tomorrow", status: "Ready" },
+  { title: "Window latch repair", place: "Canal View Studio", due: "28 Oct.", status: "Pending" },
+];
 
-render();
+const cleaningTasks = [
+  { title: "Checkout clean", place: "27 High Street", status: "To do", due: "10:30" },
+  { title: "Linen refresh", place: "Station Road Flat", status: "In progress", due: "12:00" },
+  { title: "Final inspection", place: "The Glass House", status: "Done", due: "15:30" },
+  { title: "Deep clean", place: "Canal View Studio", status: "To do", due: "Friday" },
+];
 
-function loadState() {
-  try {
-    const stored = localStorage.getItem("turnready-simple-state");
-    const previous = stored ? JSON.parse(stored) : defaultState;
-    return normalizeState(previous);
-  } catch {
-    return structuredClone(defaultState);
-  }
-}
-
-function normalizeState(raw) {
-  const base = structuredClone(defaultState);
-  const legacyProperties = [
-    { id: "mercer-4b", name: "Mercer Loft 4B", address: "Mercer House, SoHo", bedrooms: "2 bed / 1 bath" },
-    { id: "harbor-12a", name: "Harbor Suite 12A", address: "Harborline, Waterfront", bedrooms: "1 bed / 1 bath" },
-    { id: "atlas-2c", name: "Atlas Studio 2C", address: "Atlas Court, Midtown", bedrooms: "Studio / 1 bath" },
-    { id: "arden-9", name: "Arden Flat 9", address: "Arden Walk, Uptown", bedrooms: "3 bed / 2 bath" },
-    { id: "pier-3", name: "Pier Cottage 3", address: "Pier Cottages, Waterfront", bedrooms: "2 bed / 2 bath" },
-    { id: "civic-18d", name: "Civic Tower 18D", address: "Civic Tower, Downtown", bedrooms: "1 bed / 1 bath" },
-  ];
-  const migratedProperties = raw.properties || (raw.account?.created ? legacyProperties : base.properties);
-
-  const next = {
-    ...base,
-    ...raw,
-    account: { ...base.account, ...(raw.account || {}) },
-    onboarding: {
-      ...base.onboarding,
-      ...(raw.onboarding || {}),
-      completed: raw.onboarding?.completed ?? Boolean(raw.account?.created && migratedProperties.length),
-      checklist: raw.onboarding?.checklist || base.onboarding.checklist,
-    },
-    properties: migratedProperties,
-    team: raw.team || base.team,
-    bookings: raw.bookings || base.bookings,
-    cleaningJobs: (raw.cleaningJobs || raw.jobs || base.cleaningJobs).map((job) => ({
-      completedItems: [],
-      checklist: defaultChecklist,
-      status: "not-ready",
-      cleaned: false,
-      ...job,
-      propertyId: job.propertyId || job.id,
-      due: job.due || `Jun 18, ${job.checkin || "15:00"}`,
-    })),
-  };
-
-  if (!viewTitles[next.activeView]) next.activeView = "manager";
-  if (!managerSections[next.managerSection]) next.managerSection = "properties";
-  next.showAddPropertyForm = Boolean(next.showAddPropertyForm);
-  if (!next.properties.some((property) => property.id === next.selectedPropertyId)) {
-    next.selectedPropertyId = next.properties[0]?.id || "";
-  }
-  if (!next.team.some((member) => member.id === next.activeCleanerId)) {
-    next.activeCleanerId = next.team[0]?.id || "";
-  }
-  if (!next.cleaningJobs.some((job) => job.id === next.selectedCleanerJobId)) {
-    next.selectedCleanerJobId = next.cleaningJobs[0]?.id || "";
-  }
-  return next;
-}
-
-function saveState() {
-  localStorage.setItem("turnready-simple-state", JSON.stringify(state));
-}
-
-function render() {
-  const inOnboarding = !state.onboarding.completed;
-  viewTitle.textContent = inOnboarding ? "Property Manager Onboarding" : viewTitles[state.activeView];
-  const mainNav = document.querySelector("#mainNav");
-  if (mainNav) mainNav.hidden = inOnboarding;
-  updateNav();
-
-  if (inOnboarding) {
-    appView.innerHTML = renderOnboarding();
+document.addEventListener("click", (event) => {
+  const nav = event.target.closest("[data-nav]");
+  if (nav) {
+    state.active = nav.dataset.nav;
+    state.dropdown = null;
+    document.body.classList.remove("nav-open");
+    render();
     return;
   }
 
-  appView.innerHTML = state.activeView === "cleaner" ? renderCleanerDashboard() : renderManagerDashboard();
-}
+  const menu = event.target.closest("[data-mobile-menu]");
+  if (menu) {
+    document.body.classList.toggle("nav-open");
+    return;
+  }
 
-function updateNav() {
-  document.querySelectorAll(".nav-item").forEach((button) => {
-    button.classList.toggle("is-active", button.dataset.view === state.activeView);
-  });
-}
+  const dropdown = event.target.closest("[data-dropdown]");
+  if (dropdown) {
+    state.dropdown = state.dropdown === dropdown.dataset.dropdown ? null : dropdown.dataset.dropdown;
+    render();
+    return;
+  }
 
-function renderOnboarding() {
-  const step = state.onboarding.step;
-  const progress = Math.round(((step + 1) / onboardingSteps.length) * 100);
-  return `
-    <section class="onboarding-shell">
-      <div class="onboarding-card">
-        <div class="onboarding-progress">
-          <div>
-            <span class="eyebrow">Step ${step + 1} of ${onboardingSteps.length}</span>
-            <strong>${onboardingSteps[step]}</strong>
-          </div>
-          <div class="progress-track" aria-label="${progress}% complete">
-            <div class="progress-fill" style="--value: ${progress}%"></div>
-          </div>
-        </div>
-        ${renderOnboardingStep(step)}
-        <div class="onboarding-skip">
-          <button class="button ghost" data-skip-onboarding type="button">
-            Skip onboarding and load mock data
-          </button>
-        </div>
-      </div>
-    </section>
-  `;
-}
+  if (!event.target.closest(".dropdown-preview")) {
+    state.dropdown = null;
+  }
+});
 
-function renderOnboardingStep(step) {
-  if (step === 0) return renderAccountStep();
-  if (step === 1) return renderPropertyStep();
-  if (step === 2) return renderBookingSourceStep();
-  return renderChecklistStep();
-}
+render();
 
-function renderAccountStep() {
-  return `
-    <form class="onboarding-form" data-onboarding-form="account">
-      <span class="eyebrow">Step 1</span>
-      <h2>Create the manager account</h2>
-      <p>The property manager owns the workspace and controls who can access each property.</p>
-      <label>
-        <span>Company name</span>
-        <input class="field" name="company" value="${escapeAttr(state.account.company)}" placeholder="Example Stay Co." required />
-      </label>
-      <label>
-        <span>Manager name</span>
-        <input class="field" name="managerName" value="${escapeAttr(state.account.managerName)}" placeholder="Your name" required />
-      </label>
-      <label>
-        <span>Manager email</span>
-        <input class="field" name="managerEmail" type="email" value="${escapeAttr(state.account.managerEmail)}" placeholder="manager@example.com" required />
-      </label>
-      <button class="button primary" type="submit">Continue</button>
-    </form>
-  `;
-}
-
-function renderPropertyStep() {
-  return `
-    <form class="onboarding-form" data-onboarding-form="property">
-      <span class="eyebrow">Step 2</span>
-      <h2>Add the first property</h2>
-      <p>This becomes the first unit on the manager dashboard and the first cleaning job cleaners can access.</p>
-      <label>
-        <span>Property name</span>
-        <input class="field" name="name" placeholder="Mercer Loft 4B" required />
-      </label>
-      <label>
-        <span>Address or area</span>
-        <input class="field" name="address" placeholder="Mercer House, SoHo" required />
-      </label>
-      <label>
-        <span>Bedrooms / bathrooms</span>
-        <input class="field" name="bedrooms" placeholder="2 bed / 1 bath" required />
-      </label>
-      <button class="button primary" type="submit">Add property</button>
-    </form>
-  `;
-}
-
-function renderBookingSourceStep() {
-  return `
-    <form class="onboarding-form" data-onboarding-form="booking-source">
-      <span class="eyebrow">Step 3</span>
-      <h2>Add bookings</h2>
-      <p>Add the booking source and the first reservation so the manager dashboard has a calendar immediately.</p>
-      <label>
-        <span>Booking source</span>
-        <select class="select" name="type">
-          <option value="Guesty PMS">Guesty PMS</option>
-          <option value="Airbnb iCal">Airbnb iCal</option>
-          <option value="Booking.com iCal">Booking.com iCal</option>
-          <option value="Manual">Manual</option>
-        </select>
-      </label>
-      <label>
-        <span>Calendar link or account note</span>
-        <input class="field" name="source" placeholder="https://.../calendar.ics or Guesty account name" />
-      </label>
-      <div class="two-field-grid">
-        <label>
-          <span>First guest name</span>
-          <input class="field" name="guest" placeholder="Eli Park" required />
-        </label>
-        <label>
-          <span>Channel</span>
-          <select class="select" name="channel">
-            <option>Airbnb</option>
-            <option>Booking.com</option>
-            <option>Guesty</option>
-            <option>Direct</option>
-          </select>
-        </label>
-      </div>
-      <div class="two-field-grid">
-        <label>
-          <span>Arrival day</span>
-          <input class="field" name="start" value="Jun 18" required />
-        </label>
-        <label>
-          <span>Check-in time</span>
-          <input class="field" name="checkin" value="15:00" required />
-        </label>
-      </div>
-      <button class="button primary" type="submit">Save booking source</button>
-    </form>
-  `;
-}
-
-function renderChecklistStep() {
-  return `
-    <form class="onboarding-form" data-onboarding-form="checklist">
-      <span class="eyebrow">Step 4</span>
-      <h2>Set the cleaner checklist</h2>
-      <p>Choose the required items a future cleaner must confirm before marking an apartment turn-ready.</p>
-      <div class="onboarding-checklist">
-        ${inventoryItems.map((item) => `
-          <label class="check-item is-flat">
-            <input type="checkbox" name="checklist" value="${item.id}" ${state.onboarding.checklist.includes(item.id) ? "checked" : ""} />
-            <span>${item.label}</span>
-          </label>
-        `).join("")}
-      </div>
-      <button class="button primary" type="submit">Finish setup</button>
-    </form>
-  `;
-}
-
-function renderManagerDashboard() {
-  return `
-    <div class="manager-dashboard">
-      <aside class="dashboard-sidebar">
-        <div class="sidebar-kicker">Workspace</div>
-        <strong>${escapeHtml(state.account.company || "TurnReady")}</strong>
-        <span>${state.properties.length} properties managed</span>
-        <div class="manager-section-nav" aria-label="Manager dashboard sections">
-          ${Object.entries(managerSections).map(([id, section]) => `
-            <button class="manager-section-button ${state.managerSection === id ? "is-active" : ""}" data-manager-section="${id}" type="button" aria-pressed="${state.managerSection === id}">
-              ${renderIcon(section.icon)}
-              <span>${section.label}</span>
-            </button>
-          `).join("")}
-        </div>
-      </aside>
-      <div class="dashboard-content">
-        ${renderDashboardSummary()}
-        ${renderManagerSection()}
-      </div>
+function render() {
+  const activeItem = navItems.find((item) => item.id === state.active) || navItems[0];
+  app.innerHTML = `
+    <div class="app-shell">
+      ${renderSidebar()}
+      <main class="main">
+        ${renderTopbar(activeItem)}
+        <section class="content">
+          ${renderScreen()}
+        </section>
+      </main>
     </div>
   `;
 }
 
-function renderDashboardSummary() {
-  const ready = state.cleaningJobs.filter((job) => job.status === "ready").length;
-  const pending = state.cleaningJobs.filter((job) => job.status !== "ready").length;
-  const assigned = state.cleaningJobs.filter((job) => Boolean(job.cleanerId)).length;
-  const stats = [
-    { label: "Properties", value: state.properties.length, tone: "neutral" },
-    { label: "Upcoming bookings", value: state.bookings.length, tone: "accent" },
-    { label: "Turn-ready", value: ready, tone: "success" },
-    { label: "Needs cleaning", value: pending, tone: "danger" },
-  ];
-
+function renderSidebar() {
   return `
-    <section class="dashboard-summary" aria-label="Workspace summary">
-      ${stats.map((stat) => `
-        <div class="summary-card ${stat.tone}">
-          <span>${stat.label}</span>
-          <strong>${stat.value}</strong>
+    <aside class="sidebar" aria-label="Primary navigation">
+      <div class="logo">
+        <div class="logo-mark">
+          <span>credos</span>
+          <span class="logo-icon" aria-hidden="true"><span class="logo-line"></span></span>
         </div>
-      `).join("")}
-      <div class="summary-card assigned">
-        <span>Assigned jobs</span>
-        <strong>${assigned}/${state.cleaningJobs.length || 0}</strong>
       </div>
-    </section>
+      <nav class="nav">
+        ${navItems.map((item) => `
+          <button class="nav-button ${state.active === item.id ? "is-active" : ""}" data-nav="${item.id}" type="button">
+            ${icon(item.icon)}
+            <span>${item.label}</span>
+          </button>
+        `).join("")}
+      </nav>
+      <div class="profile">
+        <div class="avatar mia"></div>
+        <div class="profile-copy">
+          <strong>Cristi Gaidenic</strong>
+          <span>3 properties</span>
+        </div>
+        ${icon("chevron")}
+      </div>
+    </aside>
   `;
 }
 
-function renderManagerSection() {
-  if (state.managerSection === "calendar") return renderCalendarPanel();
-  if (state.managerSection === "team") return renderTeamPanel();
-  return renderPropertiesPanel();
-}
-
-function renderPropertiesPanel() {
+function renderTopbar(activeItem) {
+  const title = activeItem.id === "dashboard" ? "Have a good day, Cristi" : activeItem.label;
   return `
-    <section class="panel">
-      <div class="panel-header">
-        <div>
-          <span class="eyebrow">Properties</span>
-          <h2>All Properties</h2>
+    <header class="topbar">
+      <button class="mobile-menu" data-mobile-menu type="button" aria-label="Open navigation">${icon("menu")}</button>
+      <h1 class="page-title">${title}</h1>
+      <div class="topbar-actions">
+        <div class="property-select">
+          ${icon("pin")}
+          <span>27 High Street, London, England</span>
+          <span class="divider"></span>
+          <button data-dropdown="property" type="button" aria-label="Open property menu">${icon("chevron")}</button>
         </div>
-        <button class="button primary" data-add-properties type="button">Add properties</button>
+        <button class="icon-button" data-dropdown="alerts" type="button" aria-label="Notifications">
+          <span class="badge">2</span>
+          ${icon("bell")}
+        </button>
+        <button class="icon-button" data-dropdown="messages" type="button" aria-label="Messages">
+          <span class="badge">1</span>
+          ${icon("chat")}
+        </button>
       </div>
-      ${state.showAddPropertyForm ? renderAddPropertyForm() : ""}
-      <div class="property-list">
-        ${state.properties.length ? `
-          <div class="property-list-head" aria-hidden="true">
-            <span>Property</span>
-            <span>Next guest</span>
-            <span>Cleaner</span>
-            <span>Status</span>
-          </div>
-        ` : ""}
-        ${state.properties.length ? state.properties.map(renderPropertyRow).join("") : `<div class="empty-state">No properties yet.</div>`}
-      </div>
-    </section>
+      ${renderDropdown()}
+    </header>
   `;
 }
 
-function renderAddPropertyForm() {
+function renderDropdown() {
+  if (!state.dropdown) return "";
+  const items = {
+    property: ["27 High Street", "The Glass House", "Station Road Flat"],
+    alerts: ["2 unrecorded expenses", "Tax calculation updated", "Invoice due today"],
+    messages: ["New owner message", "Cleaner marked job complete"],
+  }[state.dropdown] || [];
   return `
-    <form class="add-property-form" data-add-property-form>
-      <input class="field" name="name" placeholder="Property name" required />
-      <input class="field" name="address" placeholder="Address or area" required />
-      <input class="field" name="bedrooms" placeholder="Bedrooms / bathrooms" required />
-      <div class="form-actions">
-        <button class="button ghost" data-cancel-add-property type="button">Cancel</button>
-        <button class="button primary" type="submit">Save property</button>
-      </div>
-    </form>
+    <div class="dropdown-preview">
+      ${items.map((item) => `<button type="button">${icon("dot")}<span>${item}</span></button>`).join("")}
+    </div>
   `;
 }
 
-function renderCalendarPanel() {
-  return `
-    <section class="panel">
-      <div class="panel-header">
-        <div>
-          <span class="eyebrow">Bookings</span>
-          <h2>Calendar</h2>
-        </div>
-      </div>
-      <div class="calendar-grid">
-        ${getCalendarDays().map(renderCalendarDay).join("")}
-      </div>
-    </section>
-  `;
-}
-
-function renderTeamPanel() {
-  return `
-    <section class="panel">
-      <div class="panel-header">
-        <div>
-          <span class="eyebrow">Access</span>
-          <h2>Team Members</h2>
-        </div>
-      </div>
-      <div class="panel-body simple-stack">
-        <form class="invite-form" data-invite-form>
-          <input class="field" name="name" placeholder="Name" required />
-          <input class="field" name="email" type="email" placeholder="Email" required />
-          <select class="select" name="propertyId">
-            ${state.properties.map((property) => `<option value="${escapeAttr(property.id)}">${escapeHtml(property.name)}</option>`).join("")}
-          </select>
-          <button class="button primary" type="submit">Add to team</button>
-        </form>
-        <div class="team-list">
-          ${state.team.length ? state.team.map(renderTeamMember).join("") : `<div class="empty-state small">No team members yet.</div>`}
-        </div>
-      </div>
-    </section>
-  `;
-}
-
-function renderIcon(name) {
-  const paths = {
-    properties: '<path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-8h6v8"/><path d="M9 9h.01"/><path d="M15 9h.01"/>',
-    calendar: '<path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/>',
-    team: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+function renderScreen() {
+  const screens = {
+    dashboard: renderDashboard,
+    portfolio: renderPortfolio,
+    calendar: renderCalendar,
+    reports: renderReports,
+    bookings: renderBookings,
+    invoices: renderInvoices,
+    einvoice: renderEInvoice,
+    unique: renderUniqueDeclaration,
+    cleaning: renderCleaning,
+    maintenance: renderMaintenance,
   };
+  return (screens[state.active] || renderDashboard)();
+}
 
+function renderDashboard() {
   return `
-    <svg class="section-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      ${paths[name] || paths.properties}
-    </svg>
+    <div class="dashboard-grid">
+      ${stats.map(renderStatCard).join("")}
+      <section class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">Issue an invoice</h2>
+        </div>
+        <div class="invoice-form">
+          <div class="search-control"><span>Search / add client</span>${icon("search")}</div>
+          <div class="control">0.00</div>
+          <div class="control"><span>GBP</span>${icon("chevron")}</div>
+          <button class="primary-button" type="button">Next step ${icon("arrow")}</button>
+        </div>
+      </section>
+      <section class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">Charge an income or expense</h2>
+          ${icon("info")}
+        </div>
+        <div class="charge-actions">
+          <button class="outline-button" type="button">Income ${icon("plus")}</button>
+          <button class="outline-button" type="button">Expense ${icon("plus")}</button>
+        </div>
+      </section>
+      ${renderCompactList("Last invoices emited", "View all invoices", invoices)}
+      ${renderCompactList("Last recorded expenses", "View all expenses", expenses, true)}
+      <article class="feature-card">
+        <div class="feature-icon">${icon("download")}</div>
+        <div class="feature-bottom">
+          <div class="feature-copy">
+            <h3>Export documents</h3>
+            <p>Download invoices, expenses and tax-ready statements for your selected property.</p>
+          </div>
+          <button class="outline-button" type="button">Download ${icon("download")}</button>
+        </div>
+      </article>
+      <article class="feature-card">
+        <div class="feature-icon">${icon("pen")}</div>
+        <div class="feature-bottom">
+          <div class="feature-copy">
+            <h3>Declare manually</h3>
+            <p>Create or edit fiscal declarations when the automated flow needs a manual review.</p>
+          </div>
+          <button class="outline-button" type="button">Open ${icon("arrow")}</button>
+        </div>
+      </article>
+    </div>
   `;
 }
 
-function renderPropertyRow(property) {
-  const job = getJobForProperty(property.id);
-  const booking = getNextBooking(property.id);
-  const member = job ? getTeamMember(job.cleanerId) : null;
-  const ready = job?.status === "ready";
-
+function renderStatCard(stat) {
   return `
-    <button class="property-row ${state.selectedPropertyId === property.id ? "is-selected" : ""}" data-property="${property.id}" type="button">
-      <div>
-        <strong>${escapeHtml(property.name)}</strong>
-        <span>${escapeHtml(property.address)}</span>
+    <article class="stat-card">
+      <div class="stat-main">
+        <div class="stat-copy">
+          <strong class="stat-value">${stat.value}</strong>
+          <span class="stat-label">${stat.label}</span>
+        </div>
+        <div class="trend ${stat.down ? "down" : ""}">${stat.trend} ${icon(stat.down ? "down" : "up")}</div>
       </div>
-      <div>
-        <strong>${booking?.guest ? escapeHtml(booking.guest) : "No booking"}</strong>
-        <span>${booking ? `${booking.start} at ${booking.checkin}` : "Available"}</span>
-      </div>
-      <div>
-        <strong>${member?.name ? escapeHtml(member.name) : "Unassigned"}</strong>
-        <span>Cleaner</span>
-      </div>
-      <span class="status-pill ${ready ? "ready" : "not-ready"}">${ready ? "Ready" : "Not ready"}</span>
-    </button>
+      <a class="stat-link" href="#">${stat.link}${icon("chevron")}</a>
+    </article>
   `;
 }
 
-function renderCalendarDay(day) {
-  const bookings = state.bookings.filter((booking) => booking.start === day);
+function renderCompactList(title, action, rows, logos = false) {
   return `
-    <div class="calendar-day">
-      <strong>${day}</strong>
-      ${bookings.length ? bookings.map(renderBookingCard).join("") : `<span class="empty-day">No check-ins</span>`}
+    <section class="panel">
+      <div class="panel-header">
+        <h2 class="panel-title">${title}</h2>
+        <button class="panel-link" type="button">${action}</button>
+      </div>
+      <div class="list">
+        ${rows.slice(0, 4).map((row) => renderMoneyRow(row, logos)).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderMoneyRow(row, logos) {
+  return `
+    <div class="list-row">
+      <div class="entity">
+        ${logos ? `<div class="logo-avatar">${row.logo}</div>` : `<div class="avatar ${row.avatar || ""}"></div>`}
+        <div class="entity-copy">
+          <div class="entity-title">
+            <strong>${row.name}</strong>
+            ${row.role ? `<span class="tag">${row.role}</span>` : ""}
+          </div>
+          <span>${row.date}</span>
+        </div>
+      </div>
+      <div class="amount"><strong>${row.amount}</strong><span>${row.eur}</span></div>
+      ${icon("chevron")}
+    </div>
+  `;
+}
+
+function renderPortfolio() {
+  return `
+    <section class="panel full">
+      ${renderToolbar("Properties", ["Add property", "Import CSV"], true)}
+      <div class="table">
+        <div class="table-head">
+          <span>Property</span><span>Income</span><span>Tax</span><span>Owner</span><span>Expenses</span><span>Next booking</span><span>Last sync</span><span>Status</span><span></span>
+        </div>
+        ${properties.map((property, index) => `
+          <div class="table-row">
+            <div class="property-cell">
+              <div class="property-thumb ${property.thumb}"></div>
+              <div><strong>${property.name}</strong><span>${property.location}</span></div>
+            </div>
+            <strong>${property.income}</strong>
+            <span>18%</span>
+            <strong>${property.owner}</strong>
+            <strong>${property.expenses}</strong>
+            <span>${bookings[index % bookings.length].time}</span>
+            <span>Today</span>
+            <span class="status ${property.status === "Synced" ? "synced" : "review"}">${property.status}</span>
+            ${icon("chevron")}
+          </div>
+        `).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderCalendar() {
+  return `
+    <div class="calendar">
+      <section class="panel">
+        <div class="mini-month">
+          <h3>October 2023</h3>
+          <div class="month-grid">
+            ${["M", "T", "W", "T", "F", "S", "S"].map((day) => `<span class="day-name">${day}</span>`).join("")}
+            ${Array.from({ length: 35 }, (_, index) => {
+              const day = index - 1;
+              if (day < 1 || day > 31) return "<span></span>";
+              return `<button class="${[5, 7, 24, 31].includes(day) ? "is-active" : ""}" type="button">${day}</button>`;
+            }).join("")}
+          </div>
+        </div>
+      </section>
+      <section class="panel">
+        <div class="panel-header tall">
+          <h2 class="panel-title">Bookings and tasks</h2>
+          <div class="segmented"><button class="is-active">Day</button><button>Week</button><button>Month</button></div>
+        </div>
+        <div class="schedule">${bookings.map(renderBookingCard).join("")}</div>
+      </section>
     </div>
   `;
 }
 
 function renderBookingCard(booking) {
-  const property = getProperty(booking.propertyId);
   return `
-    <div class="booking-card">
-      <strong>${property ? escapeHtml(property.name) : "Unknown property"}</strong>
-      <span>${escapeHtml(booking.guest)}</span>
-      <small>${escapeHtml(booking.channel)} / ${booking.checkin}</small>
-    </div>
+    <article class="booking-card">
+      <strong class="booking-time">${booking.time}</strong>
+      <div><h3>${booking.title}</h3><p>${booking.place} / ${booking.guest}</p></div>
+      <span class="status ${booking.status === "Ready" ? "ready" : "pending"}">${booking.status}</span>
+    </article>
   `;
 }
 
-function renderTeamMember(member) {
-  const access = member.propertyIds.map((id) => getProperty(id)?.name).filter(Boolean).join(", ");
+function renderReports() {
   return `
-    <div class="team-row">
-      <div>
-        <strong>${escapeHtml(member.name)}</strong>
-        <span>${escapeHtml(member.email)} / ${escapeHtml(member.role)}</span>
-        <small>${escapeHtml(access || "No property access")}</small>
+    <div class="dashboard-grid">
+      <section class="panel full">${renderToolbar("Reports", ["Export PDF", "Export CSV"], false)}</section>
+      <div class="report-grid panel full">
+        ${[
+          ["Gross income", "&pound;108k", "Across all active properties"],
+          ["Operating expenses", "&pound;21.6k", "Recorded and categorized"],
+          ["Average occupancy", "84%", "Bookings across October"],
+          ["Projected tax", "&pound;17.6k", "Based on current rules"],
+        ].map(([title, value, copy]) => `
+          <article class="report-card">${icon("report")}<strong>${value}</strong><p class="muted">${title}</p><p class="muted">${copy}</p></article>
+        `).join("")}
       </div>
-      <button class="chip-button" data-remove-member="${member.id}" type="button">Remove</button>
+      <section class="panel full">
+        <div class="panel-header"><h2 class="panel-title">Income by month</h2><button class="panel-link">View details</button></div>
+        <div class="bar-chart">
+          ${[45, 62, 55, 82, 70, 90, 78, 88, 96, 72, 84, 100].map((height, index) => `<span style="--height:${height}%;--alpha:${0.42 + index / 24}"></span>`).join("")}
+        </div>
+      </section>
     </div>
   `;
 }
 
-function renderCleanerDashboard() {
-  const cleaners = state.team.filter((member) => member.role === "Cleaner");
-  const activeCleaner = getTeamMember(state.activeCleanerId) || cleaners[0];
-  if (!cleaners.length) {
-    return `
+function renderBookings() {
+  return `
+    <section class="panel full">
+      ${renderToolbar("Bookings", ["New booking", "Import iCal"], true)}
+      <div class="schedule">${bookings.concat([
+        { time: "18:30", title: "Late checkout", place: "27 High Street", guest: "Ana Mihai", status: "Pending" },
+        { time: "20:00", title: "Direct booking", place: "The Glass House", guest: "RCS-RDS", status: "Ready" },
+      ]).map(renderBookingCard).join("")}</div>
+    </section>
+  `;
+}
+
+function renderInvoices() {
+  return `
+    <section class="panel full">
+      ${renderToolbar("Invoices", ["Issue invoice", "Export"], true)}
+      <div class="list">${invoices.map((invoice) => renderMoneyRow(invoice, false)).join("")}</div>
+    </section>
+  `;
+}
+
+function renderEInvoice() {
+  return `
+    <div class="form-layout">
       <section class="panel">
-        <div class="panel-header">
-          <div>
-            <span class="eyebrow">Cleaner Dashboard</span>
-            <h2>No cleaners added yet</h2>
+        <div class="panel-header tall"><h2 class="panel-title">Upload e-Invoice</h2><span class="status synced">ANAF ready</span></div>
+        <div class="form-grid">
+          <div class="upload-zone">${icon("upload")}<strong>Drop XML or PDF files here</strong></div>
+          <div class="form-grid two">
+            ${field("Supplier", "Credos Services")}
+            ${field("Invoice number", "INV-2023-1042")}
+            ${field("Amount", "120.00 GBP")}
+            ${field("Category", "Platform expense")}
           </div>
+          <button class="primary-button" type="button">Validate e-Invoice ${icon("arrow")}</button>
         </div>
-        <div class="empty-state">The property manager can add cleaners and property access from the manager dashboard.</div>
       </section>
-    `;
-  }
-  const jobs = state.cleaningJobs.filter(
-    (job) => job.cleanerId === activeCleaner?.id && job.status !== "ready"
-  );
-  const selectedJob =
-    jobs.find((job) => job.id === state.selectedCleanerJobId) ||
-    jobs[0] ||
-    state.cleaningJobs.find((job) => job.cleanerId === activeCleaner?.id);
+      ${renderSideSummary("Detected data", [["Supplier", "Credos"], ["VAT", "20%"], ["Due date", "31 Oct. 2023"], ["Status", "Ready to submit"]])}
+    </div>
+  `;
+}
 
+function renderUniqueDeclaration() {
   return `
-    <div class="cleaner-layout">
+    <div class="form-layout">
       <section class="panel">
-        <div class="panel-header">
-          <div>
-            <span class="eyebrow">Cleaner</span>
-            <h2>Properties To Clean</h2>
+        <div class="panel-header tall">
+          <h2 class="panel-title">Unique declaration</h2>
+          <div class="segmented"><button class="is-active">2023</button><button>2022</button><button>2021</button></div>
+        </div>
+        <div class="list">
+          ${[
+            ["Rental income", "&pound;108,000", "Declared from property income"],
+            ["Deductible expenses", "&pound;21,600", "Matched invoices and receipts"],
+            ["Taxable income", "&pound;86,400", "Automatically calculated"],
+            ["Estimated tax", "&pound;17,610", "Ready for review"],
+          ].map(([title, amount, copy]) => `
+            <div class="list-row"><div class="entity"><div class="feature-icon">${icon("file")}</div><div class="entity-copy"><div class="entity-title"><strong>${title}</strong></div><span>${copy}</span></div></div><div class="amount"><strong>${amount}</strong></div>${icon("chevron")}</div>
+          `).join("")}
+        </div>
+      </section>
+      ${renderSideSummary("Submission", [["Selected year", "2023"], ["Properties", "3"], ["Fiscal status", "Draft"], ["Next action", "Download PDF"]])}
+    </div>
+  `;
+}
+
+function renderCleaning() {
+  return `
+    <div class="cleaning-board">
+      ${["To do", "In progress", "Done"].map((column) => `
+        <section class="kanban-column">
+          <h2>${column}</h2>
+          ${cleaningTasks.filter((task) => task.status === column).map(renderTask).join("") || `<article class="task-card"><span>No tasks</span></article>`}
+        </section>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderMaintenance() {
+  return `
+    <section class="panel full">
+      ${renderToolbar("Maintenance", ["New task", "Assign"], true)}
+      <div class="list">
+        ${maintenanceTasks.map((task) => `
+          <div class="list-row">
+            <div class="entity"><div class="feature-icon">${icon("wrench")}</div><div class="entity-copy"><div class="entity-title"><strong>${task.title}</strong></div><span>${task.place}</span></div></div>
+            <div class="amount"><strong>${task.due}</strong><span>Due</span></div>
+            ${icon("chevron")}
           </div>
-          <select class="select cleaner-select" id="activeCleaner">
-            ${cleaners.map((cleaner) => `<option value="${cleaner.id}" ${cleaner.id === activeCleaner?.id ? "selected" : ""}>${cleaner.name}</option>`).join("")}
-          </select>
-        </div>
-        <div class="cleaner-list">
-          ${jobs.length ? jobs.map(renderCleanerJob).join("") : `<div class="empty-state">No properties to clean.</div>`}
-        </div>
-      </section>
+        `).join("")}
+      </div>
+    </section>
+  `;
+}
 
-      <section class="panel">
-        ${selectedJob ? renderCleanerChecklist(selectedJob) : `<div class="empty-state">Select a cleaner with assigned properties.</div>`}
-      </section>
+function renderToolbar(title, buttons, search) {
+  return `
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <button class="primary-button" type="button">${buttons[0]} ${icon("plus")}</button>
+        ${buttons[1] ? `<button class="outline-button" type="button">${buttons[1]}</button>` : ""}
+      </div>
+      <div class="toolbar-right">
+        ${search ? `<div class="search-control"><span>Search...</span>${icon("search")}</div>` : ""}
+        <div class="segmented"><button class="is-active">${icon("list")}</button><button>${icon("grid")}</button></div>
+      </div>
     </div>
   `;
 }
 
-function renderCleanerJob(job) {
-  const property = getProperty(job.propertyId);
-  const done = job.completedItems.length;
+function renderSideSummary(title, rows) {
   return `
-    <button class="cleaner-job ${state.selectedCleanerJobId === job.id ? "is-selected" : ""}" data-cleaner-job="${job.id}" type="button">
-      <div>
-        <strong>${property ? escapeHtml(property.name) : "Unknown property"}</strong>
-        <span>${property ? escapeHtml(property.address) : ""}</span>
+    <aside class="panel">
+      <div class="panel-header tall"><h2 class="panel-title">${title}</h2></div>
+      <div class="summary-box">
+        ${rows.map(([label, value]) => `<div class="summary-line"><span>${label}</span><strong>${value}</strong></div>`).join("")}
+        <button class="primary-button" type="button">Continue ${icon("arrow")}</button>
       </div>
-      <div>
-        <strong>${job.due}</strong>
-        <span>${done}/${job.checklist.length} checklist done</span>
-      </div>
-    </button>
+    </aside>
   `;
 }
 
-function renderCleanerChecklist(job) {
-  const property = getProperty(job.propertyId);
-  const complete = job.checklist.every((item) => job.completedItems.includes(item));
-
+function renderTask(task) {
   return `
-    <div class="panel-header">
-      <div>
-        <span class="eyebrow">After cleaning</span>
-        <h2>${property ? escapeHtml(property.name) : "Unknown property"}</h2>
-      </div>
-      <span class="status-pill ${complete ? "ready" : "not-ready"}">${complete ? "Checklist done" : "Needs items"}</span>
-    </div>
-    <div class="panel-body simple-stack">
-      <div class="detail-grid">
-        <div class="detail"><span>Address</span><strong>${property ? escapeHtml(property.address) : "Unknown"}</strong></div>
-        <div class="detail"><span>Due</span><strong>${job.due}</strong></div>
-      </div>
-      <div class="checklist">
-        ${job.checklist.map((itemId) => renderChecklistItem(job, itemId)).join("")}
-      </div>
-      <button class="button primary" data-turn-ready="${job.id}" type="button" ${complete ? "" : "disabled"}>
-        Apartment is turn-ready
-      </button>
-    </div>
+    <article class="task-card">
+      <strong>${task.title}</strong>
+      <span>${task.place}</span>
+      <div class="summary-line"><span>Due</span><strong>${task.due}</strong></div>
+    </article>
   `;
 }
 
-function renderChecklistItem(job, itemId) {
-  const item = inventoryItems.find((entry) => entry.id === itemId);
-  const checked = job.completedItems.includes(itemId);
-  return `
-    <label class="check-item ${checked ? "is-done" : ""}">
-      <input type="checkbox" data-check-item="${itemId}" data-job="${job.id}" ${checked ? "checked" : ""} />
-      <span>${item?.label || itemId}</span>
-    </label>
-  `;
+function field(label, value) {
+  return `<label class="field"><span>${label}</span><input value="${value}" /></label>`;
 }
 
-function handleClick(event) {
-  const navButton = event.target.closest("[data-view]");
-  if (navButton) {
-    state.activeView = navButton.dataset.view;
-    saveState();
-    render();
-    return;
-  }
-
-  const managerSection = event.target.closest("[data-manager-section]");
-  if (managerSection) {
-    state.managerSection = managerSection.dataset.managerSection;
-    state.showAddPropertyForm = false;
-    saveState();
-    render();
-    return;
-  }
-
-  if (event.target.closest("[data-add-properties]")) {
-    state.showAddPropertyForm = true;
-    saveState();
-    render();
-    return;
-  }
-
-  if (event.target.closest("[data-cancel-add-property]")) {
-    state.showAddPropertyForm = false;
-    saveState();
-    render();
-    return;
-  }
-
-  const propertyButton = event.target.closest("[data-property]");
-  if (propertyButton) {
-    state.selectedPropertyId = propertyButton.dataset.property;
-    saveState();
-    render();
-    return;
-  }
-
-  const cleanerJob = event.target.closest("[data-cleaner-job]");
-  if (cleanerJob) {
-    state.selectedCleanerJobId = cleanerJob.dataset.cleanerJob;
-    saveState();
-    render();
-    return;
-  }
-
-  const turnReady = event.target.closest("[data-turn-ready]");
-  if (turnReady) {
-    const job = getCleaningJob(turnReady.dataset.turnReady);
-    job.status = "ready";
-    job.cleaned = true;
-    saveState();
-    render();
-    toast(`${getProperty(job.propertyId)?.name || "Apartment"} is turn-ready`);
-    return;
-  }
-
-  const removeMember = event.target.closest("[data-remove-member]");
-  if (removeMember) {
-    state.team = state.team.filter((member) => member.id !== removeMember.dataset.removeMember);
-    saveState();
-    render();
-    return;
-  }
-
-  if (event.target.closest("#resetDemo")) {
-    state = structuredClone(defaultState);
-    saveState();
-    render();
-    return;
-  }
-
-  if (event.target.closest("[data-skip-onboarding]")) {
-    state = createMockState();
-    saveState();
-    render();
-    toast("Mock workspace loaded");
-  }
-}
-
-function handleChange(event) {
-  const activeCleaner = event.target.closest("#activeCleaner");
-  if (activeCleaner) {
-    state.activeCleanerId = activeCleaner.value;
-    state.selectedCleanerJobId =
-      state.cleaningJobs.find((job) => job.cleanerId === activeCleaner.value && job.status !== "ready")?.id ||
-      state.cleaningJobs.find((job) => job.cleanerId === activeCleaner.value)?.id ||
-      "";
-    saveState();
-    render();
-    return;
-  }
-
-  const checkItem = event.target.closest("[data-check-item]");
-  if (checkItem) {
-    const job = getCleaningJob(checkItem.dataset.job);
-    toggleItem(job.completedItems, checkItem.dataset.checkItem, checkItem.checked);
-    saveState();
-    render();
-  }
-}
-
-function handleSubmit(event) {
-  const onboardingForm = event.target.closest("[data-onboarding-form]");
-  if (onboardingForm) {
-    event.preventDefault();
-    handleOnboardingSubmit(onboardingForm);
-    return;
-  }
-
-  const addPropertyForm = event.target.closest("[data-add-property-form]");
-  if (addPropertyForm) {
-    event.preventDefault();
-    const data = new FormData(addPropertyForm);
-    const name = String(data.get("name")).trim();
-    const address = String(data.get("address")).trim();
-    const bedrooms = String(data.get("bedrooms")).trim();
-    if (!name || !address || !bedrooms) return;
-
-    const property = {
-      id: createUniquePropertyId(name),
-      name,
-      address,
-      bedrooms,
-    };
-    state.properties.push(property);
-    state.cleaningJobs.push({
-      id: `job-${property.id}`,
-      propertyId: property.id,
-      cleanerId: "",
-      status: "not-ready",
-      due: "No booking",
-      cleaned: false,
-      checklist: state.onboarding.checklist || defaultChecklist,
-      completedItems: [],
-    });
-    state.selectedPropertyId = property.id;
-    state.showAddPropertyForm = false;
-    saveState();
-    render();
-    toast(`${name} added`);
-    return;
-  }
-
-  const inviteForm = event.target.closest("[data-invite-form]");
-  if (inviteForm) {
-    event.preventDefault();
-    const data = new FormData(inviteForm);
-    const name = String(data.get("name")).trim();
-    const email = String(data.get("email")).trim();
-    const propertyId = String(data.get("propertyId"));
-    if (!name || !email || !propertyId) return;
-
-    const id = `team-${Date.now()}`;
-    state.team.push({ id, name, email, role: "Cleaner", propertyIds: [propertyId] });
-    state.cleaningJobs
-      .filter((job) => job.propertyId === propertyId)
-      .forEach((job) => {
-        job.cleanerId = id;
-      });
-    state.activeCleanerId = id;
-    saveState();
-    render();
-    toast(`${name} added to the team`);
-  }
-}
-
-function handleOnboardingSubmit(form) {
-  const stepName = form.dataset.onboardingForm;
-  const data = new FormData(form);
-
-  if (stepName === "account") {
-    state.account = {
-      created: true,
-      company: String(data.get("company")).trim(),
-      managerName: String(data.get("managerName")).trim(),
-      managerEmail: String(data.get("managerEmail")).trim(),
-    };
-    state.onboarding.step = 1;
-  }
-
-  if (stepName === "property") {
-    const property = {
-      id: slugify(String(data.get("name")) || `property-${Date.now()}`),
-      name: String(data.get("name")).trim(),
-      address: String(data.get("address")).trim(),
-      bedrooms: String(data.get("bedrooms")).trim(),
-    };
-    state.properties = [property];
-    state.selectedPropertyId = property.id;
-    state.onboarding.step = 2;
-  }
-
-  if (stepName === "booking-source") {
-    const propertyId = state.properties[0]?.id || "";
-    const start = String(data.get("start")).trim();
-    const checkin = String(data.get("checkin")).trim();
-    state.onboarding.bookingSource = {
-      type: String(data.get("type")),
-      source: String(data.get("source") || "").trim(),
-    };
-    state.bookings = [
-      {
-        id: `booking-${Date.now()}`,
-        propertyId,
-        guest: String(data.get("guest")).trim(),
-        channel: String(data.get("channel")),
-        start,
-        end: start,
-        checkin,
-        checkout: "10:00",
-      },
-    ];
-    state.onboarding.step = 3;
-  }
-
-  if (stepName === "checklist") {
-    const checklist = data.getAll("checklist").map(String);
-    state.onboarding.checklist = checklist.length ? checklist : defaultChecklist;
-    const booking = state.bookings[0];
-    const propertyId = booking?.propertyId || state.properties[0]?.id || "";
-    state.cleaningJobs = [
-      {
-        id: `job-${Date.now()}`,
-        propertyId,
-        cleanerId: "",
-        status: "not-ready",
-        due: `${booking?.start || "Jun 18"}, ${booking?.checkin || "15:00"}`,
-        cleaned: false,
-        checklist: state.onboarding.checklist,
-        completedItems: [],
-      },
-    ];
-    state.selectedCleanerJobId = state.cleaningJobs[0].id;
-    state.onboarding.completed = true;
-    state.activeView = "manager";
-  }
-
-  saveState();
-  render();
-}
-
-function createMockState() {
-  return normalizeState({
-    activeView: "manager",
-    selectedPropertyId: "mercer-4b",
-    selectedCleanerJobId: "mercer-4b",
-    activeCleanerId: "maya",
-    account: {
-      created: true,
-      company: "Demo Stay Co.",
-      managerName: "Alex Morgan",
-      managerEmail: "manager@example.com",
-    },
-    onboarding: {
-      completed: true,
-      step: onboardingSteps.length - 1,
-      bookingSource: {
-        type: "Guesty PMS",
-        source: "Demo Guesty workspace",
-      },
-      checklist: defaultChecklist,
-    },
-    properties: [
-      { id: "mercer-4b", name: "Mercer Loft 4B", address: "Mercer House, SoHo", bedrooms: "2 bed / 1 bath" },
-      { id: "harbor-12a", name: "Harbor Suite 12A", address: "Harborline, Waterfront", bedrooms: "1 bed / 1 bath" },
-      { id: "atlas-2c", name: "Atlas Studio 2C", address: "Atlas Court, Midtown", bedrooms: "Studio / 1 bath" },
-      { id: "pier-3", name: "Pier Cottage 3", address: "Pier Cottages, Waterfront", bedrooms: "2 bed / 2 bath" },
-    ],
-    team: [
-      { id: "maya", name: "Maya Chen", email: "maya@example.com", role: "Cleaner", propertyIds: ["mercer-4b"] },
-      { id: "jon", name: "Jon Bell", email: "jon@example.com", role: "Cleaner", propertyIds: ["harbor-12a", "pier-3"] },
-      { id: "marco", name: "Marco Diaz", email: "marco@example.com", role: "Cleaner", propertyIds: ["atlas-2c"] },
-    ],
-    bookings: [
-      { id: "b1", propertyId: "pier-3", guest: "Sam Okafor", channel: "Airbnb", start: "Jun 18", end: "Jun 20", checkin: "13:30", checkout: "08:45" },
-      { id: "b2", propertyId: "atlas-2c", guest: "Mina Torres", channel: "Direct", start: "Jun 18", end: "Jun 19", checkin: "14:30", checkout: "09:30" },
-      { id: "b3", propertyId: "mercer-4b", guest: "Eli Park", channel: "Airbnb", start: "Jun 18", end: "Jun 21", checkin: "15:00", checkout: "10:00" },
-      { id: "b4", propertyId: "harbor-12a", guest: "Nora Singh", channel: "Booking.com", start: "Jun 19", end: "Jun 22", checkin: "16:00", checkout: "11:00" },
-    ],
-    cleaningJobs: [
-      {
-        id: "mercer-4b",
-        propertyId: "mercer-4b",
-        cleanerId: "maya",
-        status: "not-ready",
-        due: "Jun 18, 15:00",
-        cleaned: false,
-        checklist: ["sheets", "towels", "toilet-paper", "hand-soap", "coffee"],
-        completedItems: ["sheets", "towels"],
-      },
-      {
-        id: "harbor-12a",
-        propertyId: "harbor-12a",
-        cleanerId: "jon",
-        status: "not-ready",
-        due: "Jun 19, 16:00",
-        cleaned: false,
-        checklist: ["sheets", "towels", "toilet-paper", "hand-soap"],
-        completedItems: [],
-      },
-      {
-        id: "atlas-2c",
-        propertyId: "atlas-2c",
-        cleanerId: "marco",
-        status: "ready",
-        due: "Jun 18, 14:30",
-        cleaned: true,
-        checklist: ["sheets", "towels", "toilet-paper", "coffee"],
-        completedItems: ["sheets", "towels", "toilet-paper", "coffee"],
-      },
-      {
-        id: "pier-3",
-        propertyId: "pier-3",
-        cleanerId: "jon",
-        status: "ready",
-        due: "Jun 18, 13:30",
-        cleaned: true,
-        checklist: ["sheets", "towels", "toilet-paper", "hand-soap"],
-        completedItems: ["sheets", "towels", "toilet-paper", "hand-soap"],
-      },
-    ],
-  });
-}
-
-function getCalendarDays() {
-  const days = state.bookings.map((booking) => booking.start);
-  return days.length ? [...new Set(days)] : ["Jun 18", "Jun 19", "Jun 20"];
-}
-
-function getProperty(id) {
-  return state.properties.find((property) => property.id === id);
-}
-
-function getCleaningJob(id) {
-  return state.cleaningJobs.find((job) => job.id === id);
-}
-
-function getJobForProperty(propertyId) {
-  return state.cleaningJobs.find((job) => job.propertyId === propertyId);
-}
-
-function getNextBooking(propertyId) {
-  return state.bookings.find((booking) => booking.propertyId === propertyId);
-}
-
-function getTeamMember(id) {
-  return state.team.find((member) => member.id === id);
-}
-
-function toggleItem(list, value, enabled) {
-  const index = list.indexOf(value);
-  if (enabled && index === -1) list.push(value);
-  if (!enabled && index !== -1) list.splice(index, 1);
-}
-
-function slugify(value) {
-  const slug = value
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-  return slug || `property-${Date.now()}`;
-}
-
-function createUniquePropertyId(name) {
-  const base = slugify(name);
-  let id = base;
-  let count = 2;
-  while (state.properties.some((property) => property.id === id)) {
-    id = `${base}-${count}`;
-    count += 1;
-  }
-  return id;
-}
-
-function escapeAttr(value) {
-  return String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;");
-}
-
-function escapeHtml(value) {
-  return String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;");
-}
-
-function toast(message) {
-  document.querySelector(".toast")?.remove();
-  const node = document.createElement("div");
-  node.className = "toast";
-  node.textContent = message;
-  document.body.append(node);
-  window.setTimeout(() => node.remove(), 2400);
+function icon(name) {
+  const icons = {
+    home: '<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9 21v-7h6v7"/>',
+    building: '<path d="M4 21V5h9v16"/><path d="M13 9h7v12"/><path d="M7 8h2M7 12h2M7 16h2M16 13h1M16 17h1"/>',
+    calendar: '<path d="M7 3v4M17 3v4"/><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18"/>',
+    report: '<path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 16v-5M12 16V8M16 16v-7"/>',
+    clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    file: '<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M8 13h8M8 17h5"/>',
+    send: '<path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/>',
+    archive: '<path d="M4 7h16"/><path d="M5 7v12h14V7"/><path d="M8 7V5h8v2"/><path d="M10 12h4"/>',
+    sparkle: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"/>',
+    wrench: '<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-3 3-3-3z"/>',
+    pin: '<path d="M12 21s7-5.2 7-12a7 7 0 1 0-14 0c0 6.8 7 12 7 12z"/><circle cx="12" cy="9" r="2"/>',
+    chevron: '<path d="m9 18 6-6-6-6"/>',
+    bell: '<path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/>',
+    chat: '<path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>',
+    search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/>',
+    arrow: '<path d="M5 12h14"/><path d="m13 6 6 6-6 6"/>',
+    plus: '<path d="M12 5v14M5 12h14"/>',
+    info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',
+    up: '<circle cx="12" cy="12" r="10"/><path d="m8 14 4-4 4 4"/><path d="M12 18v-8"/>',
+    down: '<circle cx="12" cy="12" r="10"/><path d="m8 10 4 4 4-4"/><path d="M12 6v8"/>',
+    download: '<path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/>',
+    pen: '<path d="m16 3 5 5L8 21H3v-5z"/>',
+    menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
+    dot: '<circle cx="12" cy="12" r="4"/>',
+    upload: '<path d="M12 21V9"/><path d="m7 14 5-5 5 5"/><path d="M5 3h14"/>',
+    list: '<path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/>',
+    grid: '<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>',
+  };
+  return `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true">${icons[name] || icons.file}</svg>`;
 }

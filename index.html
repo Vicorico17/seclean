@@ -3,37 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>TurnReady Ops</title>
+    <title>Credos Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <div class="shell">
-      <main class="workspace">
-        <header class="topbar">
-          <div class="topbar-brand">
-            <span class="brand-mark" aria-hidden="true">TR</span>
-            <div>
-              <span class="eyebrow">Thursday, Jun 18</span>
-              <h1 id="viewTitle">Manager Dashboard</h1>
-            </div>
-          </div>
-          <nav class="nav-list top-nav" id="mainNav" aria-label="Primary navigation">
-            <button class="nav-item is-active" data-view="manager" type="button">
-              Manager
-            </button>
-            <button class="nav-item" data-view="cleaner" type="button">
-              Cleaner
-            </button>
-          </nav>
-          <div class="topbar-actions">
-            <button class="button ghost" id="resetDemo" type="button">Reset demo</button>
-          </div>
-        </header>
-
-        <section id="appView" class="view" aria-live="polite"></section>
-      </main>
-    </div>
-
+    <div id="app"></div>
     <script src="app.js"></script>
   </body>
 </html>
