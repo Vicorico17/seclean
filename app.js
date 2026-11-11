@@ -7,21 +7,13 @@ const state = {
 
 const navItems = [
   { id: "dashboard", label: "Dashboard", icon: "home" },
-  { id: "portfolio", label: "Portfolio", icon: "building" },
+  { id: "portfolio", label: "Properties", icon: "building" },
   { id: "calendar", label: "Calendar", icon: "calendar" },
   { id: "reports", label: "Reports", icon: "report" },
   { id: "bookings", label: "Bookings", icon: "clock" },
   { id: "invoices", label: "Invoices", icon: "file" },
-  { id: "einvoice", label: "e-Invoice", icon: "send" },
-  { id: "unique", label: "Unique declaration", icon: "archive" },
   { id: "cleaning", label: "Cleaning", icon: "sparkle" },
   { id: "maintenance", label: "Maintenance", icon: "wrench" },
-];
-
-const stats = [
-  { value: "&pound;108,000", label: "Total income 2023", trend: "+2.4%", link: "5 uncollected Invoices" },
-  { value: "&pound;21,600", label: "Total expenses 2023", trend: "-1.6%", down: true, link: "2 unrecorded expenses" },
-  { value: "&pound;17,610", label: "Tax calculation 2023", trend: "+2.4%", link: "See all taxes" },
 ];
 
 const invoices = [
@@ -41,10 +33,10 @@ const expenses = [
 ];
 
 const properties = [
-  { name: "27 High Street", location: "London, England", owner: "Cristi Gaidenic", income: "&pound;42,800", expenses: "&pound;8,200", status: "Synced", thumb: "" },
-  { name: "The Glass House", location: "Bristol, England", owner: "Mia Bennett", income: "&pound;31,600", expenses: "&pound;6,900", status: "Review", thumb: "alt" },
-  { name: "Station Road Flat", location: "Manchester, England", owner: "Bogdan Popescu", income: "&pound;18,400", expenses: "&pound;3,100", status: "Synced", thumb: "green" },
-  { name: "Canal View Studio", location: "Birmingham, England", owner: "Ana Mihai", income: "&pound;15,200", expenses: "&pound;2,420", status: "Synced", thumb: "" },
+  { name: "27 High Street", location: "London, England", owner: "Cristi Gaidenic", income: "&pound;42,800", expenses: "&pound;8,200", status: "Ready", thumb: "" },
+  { name: "The Glass House", location: "Bristol, England", owner: "Mia Bennett", income: "&pound;31,600", expenses: "&pound;6,900", status: "Needs attention", thumb: "alt" },
+  { name: "Station Road Flat", location: "Manchester, England", owner: "Bogdan Popescu", income: "&pound;18,400", expenses: "&pound;3,100", status: "Ready", thumb: "green" },
+  { name: "Canal View Studio", location: "Birmingham, England", owner: "Ana Mihai", income: "&pound;15,200", expenses: "&pound;2,420", status: "Ready", thumb: "" },
 ];
 
 const bookings = [
@@ -132,7 +124,7 @@ function renderSidebar() {
         <div class="avatar mia"></div>
         <div class="profile-copy">
           <strong>Cristi Gaidenic</strong>
-          <span>3 properties</span>
+          <span>${properties.length} properties</span>
         </div>
         ${icon("chevron")}
       </div>
@@ -149,16 +141,16 @@ function renderTopbar(activeItem) {
       <div class="topbar-actions">
         <div class="property-select">
           ${icon("pin")}
-          <span>27 High Street, London, England</span>
+          <span>All properties · Demo workspace</span>
           <span class="divider"></span>
-          <button data-dropdown="property" type="button" aria-label="Open property menu">${icon("chevron")}</button>
+          <button data-nav="portfolio" type="button" aria-label="View properties">${icon("chevron")}</button>
         </div>
         <button class="icon-button" data-dropdown="alerts" type="button" aria-label="Notifications">
           <span class="badge">2</span>
           ${icon("bell")}
         </button>
         <button class="icon-button" data-dropdown="messages" type="button" aria-label="Messages">
-          <span class="badge">1</span>
+          <span class="badge">2</span>
           ${icon("chat")}
         </button>
       </div>
@@ -171,7 +163,7 @@ function renderDropdown() {
   if (!state.dropdown) return "";
   const items = {
     property: ["27 High Street", "The Glass House", "Station Road Flat"],
-    alerts: ["2 unrecorded expenses", "Tax calculation updated", "Invoice due today"],
+    alerts: ["Kitchen tap replacement due today", "Checkout clean due at 10:30"],
     messages: ["New owner message", "Cleaner marked job complete"],
   }[state.dropdown] || [];
   return `
@@ -189,8 +181,6 @@ function renderScreen() {
     reports: renderReports,
     bookings: renderBookings,
     invoices: renderInvoices,
-    einvoice: renderEInvoice,
-    unique: renderUniqueDeclaration,
     cleaning: renderCleaning,
     maintenance: renderMaintenance,
   };
@@ -198,52 +188,49 @@ function renderScreen() {
 }
 
 function renderDashboard() {
+  const stats = [
+    { value: properties.length, label: "Managed properties", link: "View all properties", nav: "portfolio" },
+    { value: `${properties.filter((property) => property.status === "Ready").length} / ${properties.length}`, label: "Properties ready", link: "Review property readiness", nav: "portfolio" },
+    { value: cleaningTasks.filter((task) => task.status !== "Done").length + maintenanceTasks.length, label: "Open cleaning & maintenance tasks", link: "Review maintenance", nav: "maintenance" },
+  ];
   return `
     <div class="dashboard-grid">
       ${stats.map(renderStatCard).join("")}
       <section class="panel">
         <div class="panel-header">
-          <h2 class="panel-title">Issue an invoice</h2>
+          <h2 class="panel-title">Today's property schedule</h2>
+          <button class="panel-link" data-nav="calendar" type="button">View calendar</button>
         </div>
-        <div class="invoice-form">
-          <div class="search-control"><span>Search / add client</span>${icon("search")}</div>
-          <div class="control">0.00</div>
-          <div class="control"><span>GBP</span>${icon("chevron")}</div>
-          <button class="primary-button" type="button">Next step ${icon("arrow")}</button>
+        <div class="schedule">${bookings.map(renderBookingCard).join("")}</div>
+      </section>
+      <section class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">Property readiness</h2>
+          <button class="panel-link" data-nav="portfolio" type="button">View properties</button>
+        </div>
+        <div class="list">
+          ${properties.map((property) => `
+            <div class="list-row">
+              <div class="entity"><div class="property-thumb ${property.thumb}"></div><div class="entity-copy"><strong>${property.name}</strong><span>${property.location}</span></div></div>
+              <span class="status ${property.status === "Ready" ? "ready" : "pending"}">${property.status}</span>
+            </div>
+          `).join("")}
         </div>
       </section>
       <section class="panel">
         <div class="panel-header">
-          <h2 class="panel-title">Charge an income or expense</h2>
-          ${icon("info")}
+          <h2 class="panel-title">Cleaning & turnovers</h2>
+          <button class="panel-link" data-nav="cleaning" type="button">View cleaning</button>
         </div>
-        <div class="charge-actions">
-          <button class="outline-button" type="button">Income ${icon("plus")}</button>
-          <button class="outline-button" type="button">Expense ${icon("plus")}</button>
-        </div>
+        <div class="schedule">${cleaningTasks.filter((task) => task.status !== "Done").map(renderTask).join("")}</div>
       </section>
-      ${renderCompactList("Last invoices emited", "View all invoices", invoices)}
-      ${renderCompactList("Last recorded expenses", "View all expenses", expenses, true)}
-      <article class="feature-card">
-        <div class="feature-icon">${icon("download")}</div>
-        <div class="feature-bottom">
-          <div class="feature-copy">
-            <h3>Export documents</h3>
-            <p>Download invoices, expenses and tax-ready statements for your selected property.</p>
-          </div>
-          <button class="outline-button" type="button">Download ${icon("download")}</button>
+      <section class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">Maintenance to arrange</h2>
+          <button class="panel-link" data-nav="maintenance" type="button">View maintenance</button>
         </div>
-      </article>
-      <article class="feature-card">
-        <div class="feature-icon">${icon("pen")}</div>
-        <div class="feature-bottom">
-          <div class="feature-copy">
-            <h3>Declare manually</h3>
-            <p>Create or edit fiscal declarations when the automated flow needs a manual review.</p>
-          </div>
-          <button class="outline-button" type="button">Open ${icon("arrow")}</button>
-        </div>
-      </article>
+        <div class="schedule">${maintenanceTasks.map(renderTask).join("")}</div>
+      </section>
     </div>
   `;
 }
@@ -256,9 +243,9 @@ function renderStatCard(stat) {
           <strong class="stat-value">${stat.value}</strong>
           <span class="stat-label">${stat.label}</span>
         </div>
-        <div class="trend ${stat.down ? "down" : ""}">${stat.trend} ${icon(stat.down ? "down" : "up")}</div>
+
       </div>
-      <a class="stat-link" href="#">${stat.link}${icon("chevron")}</a>
+      <button class="stat-link" data-nav="${stat.nav}" type="button">${stat.link}${icon("chevron")}</button>
     </article>
   `;
 }
@@ -302,7 +289,7 @@ function renderPortfolio() {
       ${renderToolbar("Properties", ["Add property", "Import CSV"], true)}
       <div class="table">
         <div class="table-head">
-          <span>Property</span><span>Income</span><span>Tax</span><span>Owner</span><span>Expenses</span><span>Next booking</span><span>Last sync</span><span>Status</span><span></span>
+          <span>Property</span><span>Income</span><span>Readiness</span><span>Owner</span><span>Expenses</span><span>Next activity</span><span>Cleaning</span><span>Maintenance</span><span></span>
         </div>
         ${properties.map((property, index) => `
           <div class="table-row">
@@ -311,12 +298,12 @@ function renderPortfolio() {
               <div><strong>${property.name}</strong><span>${property.location}</span></div>
             </div>
             <strong>${property.income}</strong>
-            <span>18%</span>
+            <span>${property.status}</span>
             <strong>${property.owner}</strong>
             <strong>${property.expenses}</strong>
-            <span>${bookings[index % bookings.length].time}</span>
-            <span>Today</span>
-            <span class="status ${property.status === "Synced" ? "synced" : "review"}">${property.status}</span>
+            <span>${bookings.find((booking) => booking.place === property.name)?.time || "Unscheduled"}</span>
+            <span>${cleaningTasks.find((task) => task.place === property.name)?.status || "None scheduled"}</span>
+            <span>${maintenanceTasks.filter((task) => task.place === property.name).length} open</span>
             ${icon("chevron")}
           </div>
         `).join("")}
@@ -371,7 +358,7 @@ function renderReports() {
           ["Gross income", "&pound;108k", "Across all active properties"],
           ["Operating expenses", "&pound;21.6k", "Recorded and categorized"],
           ["Average occupancy", "84%", "Bookings across October"],
-          ["Projected tax", "&pound;17.6k", "Based on current rules"],
+          ["Properties ready", `${properties.filter((property) => property.status === "Ready").length} / ${properties.length}`, "Current property readiness"],
         ].map(([title, value, copy]) => `
           <article class="report-card">${icon("report")}<strong>${value}</strong><p class="muted">${title}</p><p class="muted">${copy}</p></article>
         `).join("")}
@@ -404,51 +391,6 @@ function renderInvoices() {
       ${renderToolbar("Invoices", ["Issue invoice", "Export"], true)}
       <div class="list">${invoices.map((invoice) => renderMoneyRow(invoice, false)).join("")}</div>
     </section>
-  `;
-}
-
-function renderEInvoice() {
-  return `
-    <div class="form-layout">
-      <section class="panel">
-        <div class="panel-header tall"><h2 class="panel-title">Upload e-Invoice</h2><span class="status synced">ANAF ready</span></div>
-        <div class="form-grid">
-          <div class="upload-zone">${icon("upload")}<strong>Drop XML or PDF files here</strong></div>
-          <div class="form-grid two">
-            ${field("Supplier", "Credos Services")}
-            ${field("Invoice number", "INV-2023-1042")}
-            ${field("Amount", "120.00 GBP")}
-            ${field("Category", "Platform expense")}
-          </div>
-          <button class="primary-button" type="button">Validate e-Invoice ${icon("arrow")}</button>
-        </div>
-      </section>
-      ${renderSideSummary("Detected data", [["Supplier", "Credos"], ["VAT", "20%"], ["Due date", "31 Oct. 2023"], ["Status", "Ready to submit"]])}
-    </div>
-  `;
-}
-
-function renderUniqueDeclaration() {
-  return `
-    <div class="form-layout">
-      <section class="panel">
-        <div class="panel-header tall">
-          <h2 class="panel-title">Unique declaration</h2>
-          <div class="segmented"><button class="is-active">2023</button><button>2022</button><button>2021</button></div>
-        </div>
-        <div class="list">
-          ${[
-            ["Rental income", "&pound;108,000", "Declared from property income"],
-            ["Deductible expenses", "&pound;21,600", "Matched invoices and receipts"],
-            ["Taxable income", "&pound;86,400", "Automatically calculated"],
-            ["Estimated tax", "&pound;17,610", "Ready for review"],
-          ].map(([title, amount, copy]) => `
-            <div class="list-row"><div class="entity"><div class="feature-icon">${icon("file")}</div><div class="entity-copy"><div class="entity-title"><strong>${title}</strong></div><span>${copy}</span></div></div><div class="amount"><strong>${amount}</strong></div>${icon("chevron")}</div>
-          `).join("")}
-        </div>
-      </section>
-      ${renderSideSummary("Submission", [["Selected year", "2023"], ["Properties", "3"], ["Fiscal status", "Draft"], ["Next action", "Download PDF"]])}
-    </div>
   `;
 }
 

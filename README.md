@@ -1,18 +1,15 @@
-# TurnReady Ops
+# Rent Ready
 
-A static MVP for property managers and cleaning teams who need a simple way to track properties, bookings, cleaning readiness, and team access.
+A static property management demo for overseeing rental properties, bookings, cleaning, and maintenance.
 
 ## What it covers
 
-- Property manager account setup as the first step
-- Clean four-step property manager onboarding that asks for one setup area at a time: account, first property, bookings, checklist
-- Manager dashboard with all properties, booking calendar, and ready/not-ready status
-- Team access so managers can add cleaners and assign property access
-- Cleaner dashboard with only the properties assigned to that cleaner
-- Cleaner checklist for required items before marking an apartment turn-ready
+- Operations dashboard with property readiness, daily activity, cleaning, and maintenance
+- Property portfolio with owners, readiness, upcoming activity, and open work
+- Booking calendar and booking overview
+- Cleaning board and maintenance task list
+- Supporting rental income reports and invoices
 
 ## Run locally
 
-Open `index.html` in a browser.
-
-The demo stores changes in `localStorage`. Use **Reset demo** in the app to restart onboarding, or use **Skip onboarding and load mock data** to jump straight into a populated demo workspace.
+Open `index.html` in a browser. The app uses in-memory sample data; navigation works, while creation, import, export, and editing controls are presentation-only. Changes are not saved. Financial history and the calendar use an October 2023 sample period.

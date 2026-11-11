@@ -361,6 +361,10 @@ p {
 }
 
 .stat-link {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  text-align: left;
   display: flex;
   align-items: center;
   justify-content: space-between;
